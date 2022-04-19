@@ -73,7 +73,7 @@ function main() {
         // ---------------------------//
 
         // -1- Create a tooltip div that is hidden by default:
-        var tooltip = d3.select("#my_dataviz")
+        var tooltip = d3.select("#bubble-chart")
             .append("div")
             .style("opacity", 0)
             .attr("class", "tooltip")

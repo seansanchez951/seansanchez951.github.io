@@ -8,7 +8,7 @@ function main() {
 
 
     // append the svg object to the body of the page
-    var svg = d3.select("#my_dataviz")
+    var svg = d3.select("#treemap")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -19,8 +19,8 @@ function main() {
 
 
     Promise.all([
-        d3.csv("data/Genre Average Score Treemap Data.csv"),
-        d3.csv("data/Top Five Albums Each Genre.csv")
+        d3.csv("./data_files/genre-average-score.csv.csv"),
+        d3.csv("./data_files/top-five-albums.csv.csv")
     ]).then(([treeData,toolData]) => {
 
         console.log(treeData);
@@ -83,7 +83,7 @@ function main() {
 
 
         // create a tooltip
-        const Tooltip = d3.select("#my_dataviz")
+        const Tooltip = d3.select("#treemap")
             .append("div")
             .style("opacity", 0)
             .attr("class", "tooltip")

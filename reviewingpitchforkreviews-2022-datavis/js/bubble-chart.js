@@ -6,17 +6,16 @@ function main() {
         height = 480 - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
-    var svg = d3.select("#bubble-chart").append("svg")
+    var svg = d3.select("#bubble-chart")
+        .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
-        .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
-
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
 
     //Read the data
-    d3.csv("./data_files/genre-score-over-time.csv", function(data) {
+    d3.csv("./data_files/genre-score-over-time.csv").then( function(data) {
 
         // ---------------------------//
         //       AXIS  AND SCALE      //
@@ -67,32 +66,32 @@ function main() {
         // ---------------------------//
 
         // -1- Create a tooltip div that is hidden by default:
-        var tooltip = d3.select("#bubble-chart")
+        const tooltip = d3.select("#bubble-chart")
             .append("div")
             .style("opacity", 0)
             .attr("class", "tooltip")
             .style("background-color", "black")
             .style("border-radius", "5px")
             .style("padding", "10px")
-            .style("color", "white")
+            .style("color", "white");
 
         // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
-        var showTooltip = function(d) {
+        const showTooltip = function(event,d) {
             tooltip
                 .transition()
                 .duration(200)
             tooltip
                 .style("opacity", 1)
-                .html("Country: " + d.country)
-                .style("left", (d3.mouse(this)[0]+30) + "px")
-                .style("top", (d3.mouse(this)[1]+30) + "px")
+                .html("Genre: " + d.genre + ' || '+ "Score: " + d.score)
+                .style("left", (event.x) / 2 + "px")
+                .style("top", (event.y) / 2 - 50 + "px")
         }
-        var moveTooltip = function(d) {
+        const moveTooltip = function(event,d) {
             tooltip
-                .style("left", (d3.mouse(this)[0]+30) + "px")
-                .style("top", (d3.mouse(this)[1]+30) + "px")
+                .style("left", (event.x) / 2 + "px")
+                .style("top", (event.y) / 2 - 50 + "px")
         }
-        var hideTooltip = function(d) {
+        const hideTooltip = function (event, d) {
             tooltip
                 .transition()
                 .duration(200)
@@ -105,15 +104,15 @@ function main() {
         // ---------------------------//
 
         // What to do when one group is hovered
-        var highlight = function(d){
+        const highlight = function(event,d) {
             // reduce opacity of all groups
             d3.selectAll(".bubbles").style("opacity", .00)
             // except the one that is hovered
-            d3.selectAll("."+d).style("opacity", 1)
+            d3.selectAll("." +d).style("opacity", 1)
         }
 
         // And when it is not hovered anymore
-        var noHighlight = function(d){
+        const noHighlight = function(event, d) {
             d3.selectAll(".bubbles").style("opacity", 1)
         }
 
@@ -182,7 +181,6 @@ function main() {
             .on("mouseover", highlight)
             .on("mouseleave", noHighlight)
     })
-
 
 }
 

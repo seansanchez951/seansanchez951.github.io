@@ -1,5 +1,3 @@
-
-
 function main() {
 
     // set the dimensions and margins of the graph
@@ -8,8 +6,7 @@ function main() {
         height = 480 - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
-    var svg = d3.select("#bubble-chart")
-        .append("svg")
+    var svg = d3.select("#bubble-chart").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
@@ -188,7 +185,5 @@ function main() {
 
 
 }
-
-
 
 main()

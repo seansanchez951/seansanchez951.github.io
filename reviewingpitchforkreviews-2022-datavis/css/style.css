@@ -98,3 +98,14 @@ body {
   width: 800px;
 }
 
+/* page 2 project 1 objectives*/
+#page-2 {
+   display: block;
+   text-align: center;
+}
+
+#lollipop-chart {
+   margin: 50px 50px;
+   padding: 50px 50px;
+}
+

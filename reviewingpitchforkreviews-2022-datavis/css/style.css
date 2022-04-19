@@ -132,4 +132,12 @@ body {
 /* page 4 project 3 objectives */
 
 
+#page-4 {
+   display: block;
+   text-align: center;
+}
 
+#treemap {
+   margin: 50px 50px;
+   padding: 50px 50px;
+}

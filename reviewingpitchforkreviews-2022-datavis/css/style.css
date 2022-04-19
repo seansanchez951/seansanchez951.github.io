@@ -121,4 +121,14 @@ body {
         stroke: black;
 }
 
+#page-3 {
+   display: block;
+   text-align: center;
+}
+
+#bubble-chart {
+   margin: 50px 50px;
+   padding: 50px 50px;
+}
+
 

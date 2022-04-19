@@ -6,7 +6,7 @@ function main() {
         height = 450 - margin.top - margin.bottom;
 
     // Select the SVG canvas, specify the margin, and initialize the width & height variables
-    var svg = d3.select("#my_dataviz").append("svg")
+    var svg = d3.select("#lollipop-chart").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
 

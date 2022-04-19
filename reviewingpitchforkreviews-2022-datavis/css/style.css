@@ -109,3 +109,16 @@ body {
    padding: 50px 50px;
 }
 
+
+/* page 3 projectt 2 objectives*/
+
+.bubbles {
+        stroke-width: 1px;
+        stroke: black;
+        opacity: .8
+}
+.bubbles:hover {
+        stroke: black;
+}
+
+

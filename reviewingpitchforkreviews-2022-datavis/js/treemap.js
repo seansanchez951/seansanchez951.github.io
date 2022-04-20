@@ -19,8 +19,8 @@ function main() {
 
 
     Promise.all([
-        d3.csv("./data_files/genre-average-score"),
-        d3.csv("./data_files/top-five-albums")
+        d3.csv("./data_files/genre-average-score.csv"),
+        d3.csv("./data_files/top-five-albums.csv")
     ]).then(([treeData,toolData]) => {
 
         console.log(treeData);

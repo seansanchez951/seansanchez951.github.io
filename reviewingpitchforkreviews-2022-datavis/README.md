@@ -17,7 +17,7 @@ Visualization Tools:
 HTML/CSS/JavaScript
 D3.js
 
-Data Cleaning TOols:
+Data Cleaning Tools:
 python
 pandas
 SQL

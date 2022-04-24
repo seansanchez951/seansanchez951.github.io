@@ -8,7 +8,7 @@ function main() {
 
 
     // append the svg object to the body of the page
-    const svg = d3.select("body")
+    const svg = d3.select("#whitehat")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -25,7 +25,7 @@ function main() {
         .text("Netflix Stock Closing Prices")
 
     //Read the data
-    d3.csv("data/netflix.csv",
+    d3.csv("./data/netflix.csv",
 
         // format variables:
         function(d){

@@ -1,1 +1,99 @@
+html,
+body {
+  width: 100%;
+  font-family: ganhdi;
+  line-height: 1.7em;
+}
 
+.page {
+  display: block;
+  text-align: center;
+  margin: 30px 30px;
+  transition: all 1000ms ease-in;
+  padding: 3%;
+}
+
+.page p {
+  text-align: left;
+  font-size: 18px;
+  width: 500px;
+  margin: auto;
+  color: var(--DARK_GREY);
+}
+
+.text-show {
+  opacity: 1 !important;
+}
+
+.text-hide {
+  opacity: 0.05;
+  transition: all 250ms ease-in;
+}
+
+/* layout */
+.div-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 50px;
+}
+
+.div-half {
+  width: 800px;
+}
+
+/* section */
+.section-title {
+  padding-top: 40px;
+  padding-bottom: 50px;
+  font-size: 24px;
+}
+
+/* divider */
+.three-dots {
+  text-align: center;
+  margin-top: 30px;
+  margin-bottom: 50px;
+}
+
+.three-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: black;
+  display: inline-block;
+  margin: 0 5px;
+}
+
+/* page 1 title */
+#page-1 {
+  display: block;
+  text-align: center;
+}
+
+#page-1-title h1 {
+  font-size: 60px;
+}
+
+#page-1-title h2 {
+  font-size: 24px;
+  margin-bottom: 40px;
+  color: var(--DARK_GREY);
+}
+
+#page-1-title h3 {
+  font-size: 20px;
+  color: var(--DARK_GREY);
+}
+
+
+/* blackhat viz*/
+#page-1 {
+   display: block;
+   text-align: center;
+}
+
+#blackhat {
+   margin: 50px 50px;
+   padding: 50px 50px;
+}

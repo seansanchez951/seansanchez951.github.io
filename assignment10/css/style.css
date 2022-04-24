@@ -1,7 +1,7 @@
 html,
 body {
   width: 100%;
-  font-family: ganhdi;
+  font-family: sans-serif;
   line-height: 1.7em;
 }
 
@@ -31,24 +31,6 @@ body {
 }
 
 /* layout */
-.div-container {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  margin-top: 50px;
-}
-
-.div-half {
-  width: 800px;
-}
-
-/* section */
-.section-title {
-  padding-top: 40px;
-  padding-bottom: 50px;
-  font-size: 24px;
-}
-
 
 
 /* page 1 title */
@@ -60,6 +42,7 @@ body {
 #page-1-title h1 {
   font-size: 60px;
 }
+
 
 #page-1-title h2 {
   font-size: 24px;

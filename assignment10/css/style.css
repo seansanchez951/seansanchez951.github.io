@@ -49,21 +49,7 @@ body {
   font-size: 24px;
 }
 
-/* divider */
-.three-dots {
-  text-align: center;
-  margin-top: 30px;
-  margin-bottom: 50px;
-}
 
-.three-dots span {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: black;
-  display: inline-block;
-  margin: 0 5px;
-}
 
 /* page 1 title */
 #page-1 {
@@ -87,8 +73,8 @@ body {
 }
 
 
-/* blackhat viz*/
-#page-1 {
+/* page 2 blackhat viz*/
+#page-2 {
    display: block;
    text-align: center;
 }
@@ -97,3 +83,6 @@ body {
    margin: 50px 50px;
    padding: 50px 50px;
 }
+
+
+

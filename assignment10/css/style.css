@@ -84,5 +84,14 @@ body {
    padding: 50px 50px;
 }
 
+/* page 3 whitehat viz*/
+#page-3 {
+   display: block;
+   text-align: center;
+}
 
+#whitehat {
+   margin: 50px 50px;
+   padding: 50px 50px;
+}
 

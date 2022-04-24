@@ -2,8 +2,8 @@
 function main() {
 
     // set the dimensions and margins of the graph
-    const margin = {top: 10, right: 30, bottom: 50, left: 60},
-        width = 800 - margin.left - margin.right,
+    const margin = {top: 10, right: 30, bottom: 30, left: 60},
+        width = 600 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
 
@@ -18,7 +18,7 @@ function main() {
     // append text element to svg
     svg.append("text")
         .attr("transform", "translate(100, 0")
-        .attr("x", 235)
+        .attr("x", 150)
         .attr("y", 10)
         .attr("stroke", "black")
         .attr("font-size", "18px")
@@ -45,7 +45,7 @@ function main() {
                 .attr("transform", `translate(0, ${height})`)
                 .call(d3.axisBottom(x))
                 .append("text")
-                .attr("y", height - 300)
+                .attr("y", height - 331)
                 .attr("x", width /2 - 15)
                 .attr("stroke", "black")
                 .attr("font-size", "14px")

@@ -7,7 +7,7 @@ function main() {
         height = 400 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
-    const svg = d3.select("body")
+    const svg = d3.select("#blackhat")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -22,7 +22,7 @@ function main() {
         .attr("font-size", "23px")
         .text("When Netflix Almost Made It...")
 
-    d3.csv("data/netflix.csv", function (d) {
+    d3.csv("./data/netflix.csv", function (d) {
         return {
             date: d['date'],
             close_price: d['close_price'],

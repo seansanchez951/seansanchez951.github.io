@@ -3332,14 +3332,13 @@ input, select, textarea {
 
 /* viz divs */
 
-#lollipop {
+#treemap2 {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 
-
-#treemap2 {
+#lollipop {
 	display: flex;
 	align-items: center;
 	justify-content: center;

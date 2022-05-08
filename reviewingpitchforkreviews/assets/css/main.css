@@ -3337,3 +3337,27 @@ input, select, textarea {
 	align-items: center;
 	justify-content: center;
 }
+
+#bubble-multi-line {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+path {
+        stroke-width: 1;
+        fill: none;
+    }
+    .axis path,
+
+    .axis line {
+        fill: none;
+        stroke: grey;
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
+    .legend {
+        font-size: 12px;
+        font-weight: bold;
+        text-anchor: middle;
+    }

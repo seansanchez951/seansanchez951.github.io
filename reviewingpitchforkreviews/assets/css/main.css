@@ -3332,7 +3332,7 @@ input, select, textarea {
 
 /* viz divs */
 
-#treemap2 {
+#treemap {
 	display: flex;
 	align-items: center;
 	justify-content: center;

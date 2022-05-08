@@ -8,7 +8,7 @@ function main() {
 
 
     // append the svg object to the body of the page
-    var svg = d3.select("#treemap2")
+    var svg = d3.select("#treemap")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -68,7 +68,7 @@ function main() {
 
 
         // create a tooltip
-        const Tooltip = d3.select("#treemap2")
+        const Tooltip = d3.select("#treemap")
             .append("div")
             .style("opacity", 0)
             .attr("class", "tooltip")

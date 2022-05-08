@@ -3331,7 +3331,7 @@ input, select, textarea {
 
 /* viz divs */
 
-.lollipop {
+#lollipop {
 	display: flex;
 	align-items: center;
 	justify-content: center;

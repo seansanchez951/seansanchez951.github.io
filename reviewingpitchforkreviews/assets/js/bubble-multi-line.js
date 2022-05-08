@@ -35,8 +35,8 @@ function main() {
 
 
     Promise.all([
-        d3.csv("data/genre-score-over-time.csv"),
-        d3.csv("data/genre-avg-score-month-date.csv")
+        d3.csv("./data_files/genre-score-over-time.csv"),
+        d3.csv("./data_files/genre-avg-score-month-date.csv")
     ]).then(([bubbleData, lineData]) => {
 
         // display data to console

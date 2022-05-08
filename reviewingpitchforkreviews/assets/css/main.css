@@ -3327,3 +3327,12 @@ input, select, textarea {
 			}
 
 		}
+
+
+/* viz divs */
+
+.lollipop {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}

@@ -3338,6 +3338,13 @@ input, select, textarea {
 	justify-content: center;
 }
 
+
+#treemap2 {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
 #bubble-multi-line {
 	display: flex;
 	align-items: center;
@@ -3362,8 +3369,4 @@ path {
         text-anchor: middle;
     }
 
-#treemap2 {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
+

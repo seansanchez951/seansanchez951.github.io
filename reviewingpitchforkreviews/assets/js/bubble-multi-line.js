@@ -224,6 +224,7 @@ function main() {
                         return d
                     })
                     .attr("text-anchor", "left")
+                    .attr("font-size", "12px")
                     .style("alignment-baseline", "middle")
                     .on("mouseover", showPath)
                     .on("mouseleave", hidePath);

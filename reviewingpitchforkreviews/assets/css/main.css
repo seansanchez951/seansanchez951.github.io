@@ -3361,3 +3361,9 @@ path {
         font-weight: bold;
         text-anchor: middle;
     }
+
+#treemap2 {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}

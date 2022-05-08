@@ -66,7 +66,7 @@
 <script src="https://d3js.org/d3.v7.min.js"></script>
 
 <!-- Create a div where the graph will take place -->
-<div id="my_dataviz"></div>
+<div id="lollipop"></div>
 <!-- Add 2 buttons to change order -->
 <button onclick="update(1)">Sort By Rank</button>
 <button onclick="update(2)">Sort By Year</button>
@@ -79,7 +79,7 @@
         height = 450 - margin.top - margin.bottom;
 
     // Select the SVG canvas, specify the margin, and initialize the width & height variables
-    var svg = d3.select("#my_dataviz").append("svg")
+    var svg = d3.select("#lollipop").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
 

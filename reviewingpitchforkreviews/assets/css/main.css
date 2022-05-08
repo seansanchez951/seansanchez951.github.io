@@ -27,9 +27,7 @@ section, summary, time, mark, audio, video {
 
 article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	display: block;
 	}
 
 body {

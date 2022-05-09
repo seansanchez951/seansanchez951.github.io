@@ -19,7 +19,7 @@ function main() {
     
     svg.append("text")
         .attr("transform", "translate(100, 0)")  // Position the title on the SVG element
-        .attr("x", 90)
+        .attr("x", 95)
         .attr("y", -25)
         .attr("font-size", "16px")
         .text("Albums Review Scores 1999-2021")

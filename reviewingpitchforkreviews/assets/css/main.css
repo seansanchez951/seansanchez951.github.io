@@ -3335,7 +3335,11 @@ input, select, textarea {
 		}
 
 
-/* viz divs */
+/* viz, image, and vid divs */
+
+.center{
+ text-align: center;
+}
 
 #treemap {
 	display: flex;

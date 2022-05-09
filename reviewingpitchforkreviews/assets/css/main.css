@@ -24,7 +24,10 @@ section, summary, time, mark, audio, video {
 	font-size: 100%;
 	font: inherit;
 	vertical-align: baseline;
-	div.tooltip {
+	
+}
+
+div.tooltip {
         position: absolute;
         text-align: center;
         width: 445px;
@@ -36,8 +39,6 @@ section, summary, time, mark, audio, video {
         border-radius: 8px;
         pointer-events: none;
     }
-	
-}
 
 article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {

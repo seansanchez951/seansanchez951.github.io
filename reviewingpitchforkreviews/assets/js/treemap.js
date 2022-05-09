@@ -68,7 +68,7 @@ function main() {
 
 
         // create a tooltip
-        const Tooltip = d3.select("#tooltip")
+        const Tooltip = d3.select("#treemap")
             .append("div")
             .style("opacity", 0)
             .attr("class", "tooltip")

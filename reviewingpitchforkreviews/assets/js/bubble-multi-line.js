@@ -15,6 +15,14 @@ function main() {
         .append("g")
         .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
+    
+    
+    svg.append("text")
+        .attr("transform", "translate(100, 0)")  // Position the title on the SVG element
+        .attr("x", 90)
+        .attr("y", -25)
+        .attr("font-size", "16px")
+        .text("Albums Review Scores 1999-2021")
 
 
     // append interaction instructions text

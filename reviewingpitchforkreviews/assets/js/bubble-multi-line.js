@@ -100,9 +100,8 @@ function main() {
                 .style("opacity", 0)
                 .attr("class", "tooltip")
                 .style("background-color", "white")
-                .style("border", "solid")
                 .style("border-width", "1px")
-                .style("border-radius", "5px")
+                .style("border-radius", "1px")
                 .style("padding", "10px")
 
 

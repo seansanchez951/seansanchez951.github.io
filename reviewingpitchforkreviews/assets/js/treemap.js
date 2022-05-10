@@ -64,15 +64,25 @@ function main() {
         // console.log(tooltipList[index].value[0]);
         // tooltipList is an object
         // var index = tooltipList.map(function(o) { return o.key; }).indexOf("Jazz");
-
-
-
+        
+        
+        // create a tooltip
+        const Tooltip = d3.select("#my_dataviz")
+            .append("div")
+            .style("opacity", 0)
+            .attr("class", "tooltip")
+            .style("background-color", "white")
+            .style("border-width", "1px")
+            .style("border-radius", "5px")
+            .style("padding", "10px");
 
         // Three function that change the tooltip when user hover / move / leave a cell
         const mouseover = function (event, d) {
             d3.select(this)
                 .style("fill", "#DE9E36")
-          
+            Tooltip
+                .style("opacity", 1)
+                .style("stroke", "black")
         };
 
         // need to change the mouse interaction code to events
@@ -87,13 +97,21 @@ function main() {
 
             const myJSON = JSON.stringify(tooltipList[index].value);
 
+            Tooltip
+                .html(myJSON)
+                .style("left", (event.pageX) + "px") // It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
+                .style("top", (event.pageY) + "px")
         };
 
 
         const mouseleave = function (event, d) {
             d3.select(this)
                 .style("fill", "#FBFFF1");
-           
+            Tooltip
+                .style("opacity", 0)
+                .style("stroke", "black")
+                .style("opacity", 0.8)
+                .style("fill", "#FBFFF1");
         };
 
         // use the above information to add rectangles:

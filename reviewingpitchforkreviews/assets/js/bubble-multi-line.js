@@ -96,7 +96,7 @@ function main() {
         // build tooltip div for dots
         // -1- Create a tooltip div that is hidden by default:
         const tooltip = d3.select("#bubble-multi-line")
-            .append("div")
+            .append("bubble_tooltip")
                 .style("opacity", 0)
                 .attr("class", "tooltip")
                 .style("background-color", "white")

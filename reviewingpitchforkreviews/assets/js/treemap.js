@@ -72,8 +72,10 @@ function main() {
             .style("opacity", 0)
             .attr("class", "tooltip")
             .style("background-color", "white")
+            .style("width", "400px")
+            .style("height", "300px")
             .style("border-width", "1px")
-            .style("border-radius", "5px")
+            .style("border-radius", "3px")
             .style("padding", "10px");
 
         // Three function that change the tooltip when user hover / move / leave a cell

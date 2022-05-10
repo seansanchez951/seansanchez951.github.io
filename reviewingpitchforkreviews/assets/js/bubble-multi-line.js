@@ -93,7 +93,45 @@ function main() {
             .range(['#854770', '#1f78b4', '#799496', '#33a02c', '#fb9a99', '#e31a1c', '#C89933', '#14362C', '#cab2d6']);
 
 
-        
+        // build tooltip div for dots
+        // -1- Create a tooltip div that is hidden by default:
+        const tooltip = d3.select("#bubble-multi-line")
+            .append("div")
+                .style("opacity", 0)
+                .attr("class", "tooltip")
+                .style("background-color", "white")
+                .style("border", "solid")
+                .style("border-width", "1px")
+                .style("border-radius", "5px")
+                .style("padding", "10px")
+
+
+        // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
+        // mouseover
+        const showTooltip = function (event, d) {
+            tooltip
+                .transition()
+                .duration(200)
+            tooltip
+                .style("opacity", 1)
+                .html(d.name + ' -- ' + d.title + ' -- ' + d.score)
+                .style("left", (event.x)/2 + "px")
+                .style("top", (event.y)/2-50 + "px")
+        }
+
+        // mousemove
+        const moveTooltip = function (event, d) {
+            tooltip
+                .style("left", (event.x)/2 + "px")
+                .style("top", (event.y)/2-50 + "px")
+        }
+        // mouseLeave
+        const hideTooltip = function(event, d) {
+            tooltip
+                .transition()
+                .duration(200)
+                .style("opacity", 0)
+        }
 
 
         // create function that will show and hide path of multi-line
@@ -138,6 +176,9 @@ function main() {
                 })
                 .style("stroke-width", 0.5 + "px")
                 .style("stroke", "black")
+            .on("mouseover", showTooltip )
+            .on("mousemove", moveTooltip )
+            .on("mouseleave", hideTooltip )
             
 
 

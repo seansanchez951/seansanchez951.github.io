@@ -72,7 +72,8 @@ function main() {
             .style("opacity", 0)
             .attr("class", "tooltip")
             .style("background-color", "white")
-            .style("padding", "10px");
+            .style("width", "285px")
+            .style("padding", "4px");
 
         // Three function that change the tooltip when user hover / move / leave a cell
         const mouseover = function (event, d) {

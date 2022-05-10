@@ -72,6 +72,7 @@ function main() {
             .style("opacity", 0)
             .attr("class", "tooltip")
             .style("background-color", "white")
+            .style("font-size", "16px")
             .style("width", "285px")
             .style("padding", "4px");
 

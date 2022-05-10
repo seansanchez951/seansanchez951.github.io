@@ -153,9 +153,8 @@ input, select, textarea {
 
 video {
  display: flex;
- flex-direction: column;
  align-items: center;
-
+ all: inherit;	
 }
 
 

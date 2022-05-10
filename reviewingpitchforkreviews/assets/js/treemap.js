@@ -68,14 +68,10 @@ function main() {
         
         // create a tooltip
         const Tooltip = d3.select("#treemap")
-            .append("div")
+            .append("treemap_tooltip")
             .style("opacity", 0)
             .attr("class", "tooltip")
             .style("background-color", "white")
-            .style("width", "400px")
-            .style("height", "300px")
-            .style("border-width", "1px")
-            .style("border-radius", "3px")
             .style("padding", "10px");
 
         // Three function that change the tooltip when user hover / move / leave a cell

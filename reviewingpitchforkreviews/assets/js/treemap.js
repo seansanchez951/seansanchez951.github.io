@@ -76,7 +76,7 @@ function main() {
                 .style("border", "solid")
                 .style("border-width", "1px")
                 .style("border-radius", "5px")
-                .style("font-size", "x-small")
+                .style("font-size", "10.5px")
                 .style("height", "-webkit-fill-available")
                 .style("padding", "10px");
 

@@ -48,6 +48,7 @@ section, summary, time, mark, audio, {
          border: 0px;
          border-radius: 8px;
          pointer-events: none;
+	 font-size: small;
      }
 
 

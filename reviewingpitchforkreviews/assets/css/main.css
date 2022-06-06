@@ -24,6 +24,7 @@ section, summary, time, mark, audio, {
 	font-size: 100%;
 	font: inherit;
 	vertical-align: baseline;
+	height: -webkit-fill-available;
 }
 
 #bubble_tooltip {
@@ -49,7 +50,7 @@ section, summary, time, mark, audio, {
          border-radius: 8px;
          pointer-events: none;
 	 font-size: small;
-	 height: -webkit-fill-available;
+	 
      }
 
 

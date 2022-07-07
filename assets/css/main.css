@@ -200,9 +200,14 @@ input, select, textarea {
 
 	blockquote {
 		border-left: solid 6px #efefef;
-		font-style: italic;
+		font-family: Inconsolata,monospace;
+		font-size: 16px;
 		margin: 0 0 2em 0;
 		padding: 0.5em 0 0.5em 1.5em;
+	}
+
+	.tab {
+		margin-left: 40px;
 	}
 
 	code {

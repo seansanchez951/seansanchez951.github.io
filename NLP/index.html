@@ -1,0 +1,812 @@
+<!DOCTYPE HTML>
+<!--
+	Strata by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Strata by HTML5 UP</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Header -->
+			<header id="header">
+				<div class="inner">
+					<a href="#" class="image avatar"><img src="images/thumbs/europe.jpg" alt="" /></a>
+					<h1><strong>Deep Learning · NLP · Text Classification</strong><br />
+					<br />
+					</a></h1>
+				</div>
+			</header>
+
+		<!-- Main -->
+			<div id="main">
+
+				<!-- One -->
+					<section id="one">
+						<header class="major">
+							<h2>Can we detect a human's emotion given their messages on social media?</h2>
+						</header>
+						<p>A common natural language processing task is to classify text. The most common type of text classification is where a text is classified as positive or negative. In this project, we will consider a slightly harder problem. Given a persons Facebook message, determine the individuals emotional state. This form of natural language processing is known as sentiment analysis. 
+						</br>
+						</br>
+						Note: You can find the accompanying code in the Colab Notebook link below. I highly encourage you to fork it, tweak the parameters, or try the model with your own dataset!
+		<li><a href="https://colab.research.google.com/drive/1Hi1uE-E917vSm4mvWx187uDKQsBd08fj?usp=sharing">ML Sentiment Analysis Project Colab Notebook</a></li>
+						</br>
+						</p>
+					</section>
+
+				<!-- Two -->
+					<section id="two">
+						<h2>The Data</h2>
+						<p>The data used for this project comes from Facebook's AI Empathetic Dialogue dataset. The training dataset comprises of 84169 entries with 8 columns consisting of non-null values of a users prompt (intial message) and a second users utterance (response to the message) associating a prescribed emotion in the context value. We'll only use the prompt and context columns for training our model. The link to the raw data can be found here.    
+						</br>
+						<li><a href="https://github.com/facebookresearch/EmpatheticDialogues">Facebook EmpatheticDialogues</a></li>
+						</br>
+						</p>
+						<h2>Why use Sentiment Analysis?</h2>
+						<p>Sentiment analysis tools are essential to detect and understand customer feelings. Companies that use these tools to understand how customers feel can use it to improve the customer experience. Sentiment analysis tools generate insights into how companies can enhance the customer experience and improve customer service. Some common use cases for sentiment analysis include chat bots, planning product improvements, and prioritizing customer service issues. 
+						</p>
+						</br>
+						<h2>Related Work</h2>
+						<p>Research reports related to this project were reviewed prior to the data preprocessing and model implementation stages. These reports were assessed to understand any potential pitfalls with building a text classification model. Any code sourced is cited within the colab notebook. Links for these reports are found below.</p>
+
+						<li><a href="https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf">Language Models are Unsupervised Multitask Learners</a></li>
+
+						<li><a href="https://arxiv.org/ftp/arxiv/papers/2204/2204.11320.pdf">Emotion-Aware Transformer 	Encoder for Empathetic Dialogue Generation</a></li>
+
+						<li><a href="https://cryptonymous9.github.io/files/project_files/CARO_Empathetic_Health_Conversational_Chatbot.pdf">CARO: An Empathetic Health Conversational Chatbot
+						for People with Major Depression
+						</a></li>
+						</br>
+						</br>
+
+						<h2>Setup files</h2>
+
+						<p>Using a Google Colab notebook for this project. Import libraries and load files using the wget command.
+							<blockquote># import libraries
+										</br>
+										import os
+										</br>
+										import random
+										</br>
+										import numpy as np
+										</br>
+										import pandas as pd
+										</br>
+										import tensorflow as tf
+										</br>
+										from tensorflow import keras
+										</br>
+										from tensorflow.keras import layers
+										</br>
+										import matplotlib.pyplot as plt
+							</blockquote>
+							Download dataset from Facebook AI public files
+							</br>
+							<blockquote>
+								!wget&nbsp"https://dl.fbaipublicfiles.com/parlai/empatheticdialogues/empatheticdialogues.tar.gz"
+							</blockquote>
+							<a href="images/thumbs/fb_dataset_download.jpg" class="image"><img src="images/thumbs/fb_dataset_download.jpg" alt="" /></a>
+							</br>
+							</br>
+							Unzip the training, validation, and test files.
+							<blockquote>
+								!tar -xvf empatheticdialogues.tar.gz
+							</blockquote>
+							<a href="images/thumbs/unzip_files.jpg" class="image"><img src="images/thumbs/unzip_files.jpg" alt="" /></a>
+							</br>
+							</br>
+							<h2>Load and clean data</h2>
+							<p>
+								Let's start with the training data. 
+								<blockquote>
+									# load csv file
+									</br> 
+									splitname = "train"
+									</br>
+									path = '/content/empatheticdialogues'
+									</br>
+									</br>
+									# create variable for training dataset
+									</br>
+									train_df = open(os.path.join(path, f"{splitname}.csv")).readlines()
+									</br>
+									</br>
+									# print first two indices
+									</br>
+									print(train_df[0].strip().split(","))
+									</br>
+									print(train_df[1].strip().split(","))
+									</br>
+									print(type(train_df))
+								</blockquote>
+								<a href="images/thumbs/raw_train_file.jpg" class="image"><img src="images/thumbs/raw_train_file.jpg" alt="" /></a>
+								It appears that our data structure is a 2D array. The first index are the column names for the dataset. The second index are the first data values. The third index is similar so we'll assume the remaining indices are consistent.  
+							</p>
+							<p>
+								Next we'll parse through the dataset and extract the values from the prompt and context columns. Based on the print statements above, the values are located in the 2nd and 3rd index in each sub-array. We'll append the values to their own arrays.
+								<blockquote>
+									raw_train_prompt_list = []
+									</br>
+									raw_train_context_list = []
+									</br>
+									</br>
+									for i in range(1, len(train_df)):
+									</br>
+								  		<p class="tab">data_line = train_df[i].strip().split(",")
+								  			</br>
+										raw_train_context_list.append(data_line[2])
+										</br>
+									 	raw_train_prompt_list.append(data_line[3].replace("_comma_", ","))
+									</br>
+								</blockquote>
+								Now we'll create a pandas dataframe using the two arrays.
+								</br>
+								<blockquote>
+									train_dataframe = pd.DataFrame(columns=['prompt','context'])
+									</br>
+									train_dataframe['prompt'] = raw_train_prompt_list
+									</br>
+									train_dataframe['context'] = raw_train_context_list
+									</br>
+									print(f"There are {len(train_dataframe)} rows in the training dataset.")
+									</br>
+									train_dataframe.head()	
+								</blockquote>
+								</br>
+								<a href="images/thumbs/train_df_head.jpg" class="image"><img src="images/thumbs/train_df_head.jpg" alt="" /></a>
+								</br>
+								The shape of the dataframe is (84169,2)
+							</p>
+							Looks like there are duplicate entries
+							<blockquote>
+								total_duplicate_train = sum(train_dataframe[['prompt','context']].duplicated())
+								</br>
+								</br>
+								print(f"There are {total_duplicate_train} duplicate prompts (messages) to context (emotion) rows in the training data.")
+								</br>
+							</blockquote>
+							<a href="images/thumbs/train_dups.jpg" class="image"><img src="images/thumbs/train_dups.jpg" alt="" /></a> 
+						</p>
+						<p>
+							We'll remove the duplicates in order to remove biased performance estimates when training the model.
+							<blockquote>
+							train_dataframe = train_dataframe.drop_duplicates(ignore_index=True)
+							</br>
+							train_dataframe.shape
+							</blockquote>	
+							<a href="images/thumbs/train_no_dups.jpg" class="image"><img src="images/thumbs/train_no_dups.jpg" alt="" /></a> 
+							</br>
+							Now our training dataset has been reduced to 19307 rows.
+							</br>
+							</br>
+							<h2>EDA + Pre-Processing</h2>
+							Let's display a random message from the training data with the accompying sentiment. Using a random index from the dataset. 
+							</br>
+							<blockquote>
+							idx = np.random.randint(train_dataframe.shape[0])
+							</br>
+							print('Train DF row is: ', idx)
+							</br>
+							print('Message: ', train_dataframe['prompt'].iloc[idx])
+							</br>
+							print('Sentiment: ', train_dataframe['context'].iloc[idx])
+							</blockquote>	
+							<a href="images/thumbs/train_rand_msg.jpg" class="image"><img src="images/thumbs/train_rand_msg.jpg" alt="" /></a>
+							</br> 
+							</br>
+							The output shows the row number for this data entry, the message from the Facebook user, and the users sentiment associated with the message.
+							</br>   
+							</br>
+							Let's display the value counts for each sentiment.
+							<blockquote>
+								print(train_dataframe['context'].value_counts()) 
+							</blockquote>
+							<a href="images/thumbs/train_context_vc.jpg" class="image"><img src="images/thumbs/train_context_vc.jpg" alt="" /></a>
+							</br>
+							The output above shows the distribution of 32 emotions in the dataset.
+							</br>
+							</br>
+							Let's visualize the value counts using a horizontal bar chart
+							<blockquote>
+								train_dataframe.context.value_counts().sort_values().plot(kind = 'barh', linewidth=20, figsize = [8,8], title='Sentiment Frequency Training Data')
+							</blockquote>
+							<a href="images/thumbs/train_bar_chart_1.jpg" class="image"><img src="images/thumbs/train_bar_chart_1.jpg" alt="" /></a>
+							</br>
+							It would be difficult for our text-classification model to predict the sentiment between 32 possible classes. Many of these sentiments are very similar. In order to improve the categorical accuracy of the model we'll divide the total number of emotions into 8 groups by grouping similar emotions together. Another benefit for grouping emotions is to obtain an increased number of examples per class with a balanced distribution during the training process.
+							</br> 
+							</br> 
+							Create a function which groups similar emotions and appends them to a new array.
+							</br>
+							</br>
+							<blockquote>
+								def emotion_grouping(df_column):
+								  <p class="tab">excited_list = ['excited', 'surprised', 'joyful']
+								  </br>
+								  afraid_list = ['afraid', 'terrified', 'anxious', 'apprehensive']
+								  </br>
+								  disgusted_list = ['disgusted', 'embarrassed', 'guilty', 'ashamed']
+								  </br>
+								  annoyed_list = ['angry', 'annoyed', 'jealous', 'furious']
+								  </br>
+								  grateful_list = ['faithful', 'trusting', 'grateful', 'caring', 'hopeful']
+								  </br>
+								  disappointed_list = ['sad', 'disappointed', 'devastated', 'lonely', 'nostalgic', 'sentimental']
+								  </br>
+								  impressed_list = ['proud', 'impressed', 'content']
+								  </br>
+								  prepared_list = ['anticipating', 'prepared', 'confident']
+								  </br>
+								  </br>
+								  new_emotion_group_list = []
+								  </br>
+								  </br>
+								  for index, value in df_column.items():
+								  </br>
+								  &nbspif value in excited_list:
+								  </br>
+								  &nbsp&nbsp&nbspnew_emotion_group_list.append('excited')
+								  </br>
+								  &nbspelif value in afraid_list:
+								  </br>
+								  &nbsp&nbsp&nbspnew_emotion_group_list.append('afraid'))
+								  </br>
+								  &nbspelif value in disgusted_list:
+								  </br>
+								  &nbsp&nbsp&nbspnew_emotion_group_list.append('disgusted')
+								  </br>
+								  &nbspelif value in annoyed_list:
+								  </br>
+								  &nbsp&nbsp&nbspnew_emotion_group_list.append('annoyed')
+								  </br>
+								  &nbspelif value in grateful_list:
+								  </br>
+								  &nbsp&nbsp&nbspnew_emotion_group_list.append('grateful')
+								  </br>
+								  &nbspelif value in disappointed_list:
+								  </br>
+								  &nbsp&nbsp&nbspnew_emotion_group_list.append('disappointed')
+								  </br>
+								  &nbspelif value in impressed_list:
+								  </br>
+								  &nbsp&nbsp&nbspnew_emotion_group_list.append('impressed')
+								  </br>
+								  &nbspelif value in prepared_list:
+								  </br>
+								  &nbsp&nbsp&nbspnew_emotion_group_list.append('prepared')
+								  </br>
+								  </br>
+								  return new_emotion_group_list
+							</blockquote>
+							Use grouping function with the context column in the training data and add grouped column to dataframe
+							<blockquote>
+								train_grouped_emotions_col = emotion_grouping(train_dataframe['context'])
+								</br>
+								train_dataframe['grouped_emotions'] = train_grouped_emotions_col
+							</blockquote>
+							Display side-by-side comparison of ungrouped and grouped emotion columns.
+							<blockquote>
+								train_dataframe[['context','grouped_emotions']].head(10)
+							</blockquote>
+							<a href="images/thumbs/grouped_side_by_side.jpg" class="image"><img src="images/thumbs/grouped_side_by_side.jpg" alt="" /></a>
+							</br>
+							We'll use the 'grouped_emotions' column for our target values.
+							</br>
+							</br>
+ 							Let's check the value counts in the grouped_emotions column.
+							<blockquote>
+								train_dataframe['grouped_emotions'].value_counts()
+							</blockquote>
+							<a href="images/thumbs/train_grouped_vc.jpg" class="image"><img src="images/thumbs/train_grouped_vc.jpg" alt="" /></a>
+							</br>
+							</br>
+							Visualize using a horizontal bar chart.
+							<blockquote>
+								train_dataframe.grouped_emotions.value_counts().sort_values().plot(kind = 'barh', linewidth=20, figsize = [8,8], title='Sentiment Frequency Training Data')
+							</blockquote>
+							<a href="images/thumbs/grouped_h_chart.jpg" class="image"><img src="images/thumbs/grouped_h_chart.jpg" alt="" /></a>
+							</br>
+							</br>
+							<i>Next Steps - Validation data</i>
+							</br>
+							We now have two columns in the training data we can use as the input and output variables for training our model. The 'prompt' column will be the input (X) and the 'grouped_emotions' column for the output (y). We'll perform the same steps for removing duplicates and grouping emotions for the validation data. The code below are the same pre-processing steps as above so there will be less descriptive notes.
+							</br>
+							</br>
+							<blockquote>
+								# pre-processing validation data
+								</br>
+								</br>
+								splitname = "valid"
+								</br>
+								path = '/content/empatheticdialogues'
+								</br>
+								</br>
+								valid_df = open(os.path.join(path, f"{splitname}.csv")).readlines()
+								</br>
+								print(valid_df[0].strip().split(","))
+								</br>
+								print(type(valid_df))
+								</br>
+								</br>
+								# load prompt and context in pandas dataframe
+								</br>
+								raw_valid_prompt_list = []
+								raw_valid_context_list = []
+								</br>
+								</br>
+								for i in range(1, len(valid_df)):
+								  <p class="tab">data_line = valid_df[i].strip().split(",")
+								  </br>
+								  raw_valid_context_list.append(data_line[2])
+								  </br>
+								  raw_valid_prompt_list.append(data_line[3].replace("_comma_", ","))	
+								</br>
+								</br>
+							</blockquote>
+							<blockquote>
+								valid_dataframe = pd.DataFrame(columns=['prompt','context'])
+								</br>
+								valid_dataframe['prompt'] = raw_valid_prompt_list
+								</br>
+								valid_dataframe['context'] = raw_valid_context_list
+							</blockquote>
+							<blockquote>
+								# drop duplicates
+								</br>
+								valid_dataframe = valid_dataframe.drop_duplicates(ignore_index=True)
+								valid_dataframe.shape
+							</blockquote> 
+							<blockquote>
+								# display sentiment value counts
+								</br>
+								print(valid_dataframe['context'].value_counts())
+								</br>
+								</br>
+								valid_dataframe.context.value_counts().sort_values().plot(kind = 'barh', linewidth=20, figsize = [8,8], title='Sentiment Frequency Validation Data')
+								</br>
+								</br>
+								# use emotion_grouping function
+								</br>
+								valid_grouped_emotions_col = emotion_grouping(valid_dataframe['context'])
+								</br>
+								valid_dataframe['grouped_emotions'] = valid_grouped_emotions_col
+								</br>
+								valid_dataframe[['context','grouped_emotions']].head(10)
+								</br>
+								</br>
+								# display grouped_emotions value counts
+								</br>
+								valid_dataframe['grouped_emotions'].value_counts()
+								</br>
+								</br>
+								valid_dataframe.grouped_emotions.value_counts().sort_values().plot(kind = 'barh', linewidth=20, figsize = [8,8], title='Sentiment Frequency Validation Data')
+							</blockquote>
+							<i>Next Steps - Test data</i>
+							</br>
+							</br>
+							For the test data, we perform the same preprocessing steps and group the emotions together. We do not need to drop duplicates for the test data because we'll only use the test data for the inference stage where we test our model on raw text data it hasn't seen. the code below is the same as the previous steps minus dropping duplicates.
+							</br>
+							</br>   
+							<blockquote>
+								# pre-processing test data
+								</br>
+								</br>
+								splitname = "test"
+								</br>
+								path = '/content/empatheticdialogues'
+								</br>
+								</br>
+								test_df = open(os.path.join(path, f"{splitname}.csv")).readlines()
+								</br>
+								print(test_df[0].strip().split(","))
+								</br>
+								print(type(test_df))
+								</br>
+								</br>
+								# load prompt and context in pandas dataframe
+								</br>
+								raw_test_prompt_list = []
+								raw_test_context_list = []
+								</br>
+								</br>
+								for i in range(1, len(test_df)):
+								  <p class="tab">data_line = test_df[i].strip().split(",")
+								  </br>
+								  raw_test_context_list.append(data_line[2])
+								  </br>
+								  raw_test_prompt_list.append(data_line[3].replace("_comma_", ","))	
+								</br>
+								</br>
+							</blockquote>
+							<blockquote>
+								test_dataframe = pd.DataFrame(columns=['prompt','context'])
+								</br>
+								test_dataframe['prompt'] = raw_test_prompt_list
+								</br>
+								test_dataframe['context'] = raw_test_context_list
+							</blockquote>
+							<blockquote>
+								# display sentiment value counts
+								</br>
+								print(test_dataframe['context'].value_counts())
+								</br>
+								</br>
+								test_dataframe.context.value_counts().sort_values().plot(kind = 'barh', linewidth=20, figsize = [8,8], title='Sentiment Frequency Test Data')
+								</br>
+								</br>
+								# use emotion_grouping function
+								</br>
+								test_grouped_emotions_col = emotion_grouping(test_dataframe['context'])
+								</br>
+								test_dataframe['grouped_emotions'] = test_grouped_emotions_col
+								</br>
+								test_dataframe[['context','grouped_emotions']].head(10)
+								</br>
+								</br>
+								# display grouping emotion value counts
+								</br>
+								test_dataframe['grouped_emotions'].value_counts()
+								</br>
+								</br>
+								test_dataframe.grouped_emotions.value_counts().sort_values().plot(kind = 'barh', linewidth=20, figsize = [8,8], title='Sentiment Frequency Test Data')
+							</blockquote>
+							<h2>Vectorizing Text</h2>
+							Deep learning models, being differentiable functions, can only process numeric tensors: they can't take raw text as inputs. Vectorizing text is the process of transforming text into numeric tensors. This process involves a few key steps which includes standardizing text, tokenization, and converting each token into a numerical vector. We'll start by vectorizing our target labels, the 8 emotions we'll use for our sentiment analysis. 
+							</br>
+							</br>
+							<i>Processing output labels</i>
+							</br>
+							We'll vectorize our target labels by using the keras StingLookup layer which maps string features to integer indices. By switching the output mode to 'multi_hot', input strings are encoded into an array where each dimension corresponds to an element in the vocabulary. A 'OOV' (out of vocabulary) token is created to cover any labels in the validation or test data that is not in the training data. Each target label will be a (1,9) shaped numeric array consisting of a 1 for the target label and 0's for the non-target labels. 
+							</br>
+							</br>
+							<blockquote>
+								sentiment = tf.ragged.constant(train_dataframe['grouped_emotions'].values)
+								</br>
+								lookup = tf.keras.layers.StringLookup(output_mode="multi_hot")
+								</br>
+								lookup.adapt(sentiment)
+								</br>
+								</br>
+								# the sentiment vocabulary added the [UNK] OOV token for unknown values
+								</br>
+								sentiment_vocab = lookup.get_vocabulary()
+								</br>
+								</br>
+								# [UNK] token created to cover unknown emotion sentiments
+								</br>
+								print("Sentiment Vocabulary:\n")
+								</br>
+								print(sentiment_vocab)
+							</blockquote>
+							<a href="images/thumbs/sent_vocab.jpg" class="image"><img src="images/thumbs/sent_vocab.jpg" alt="" /></a>
+							</br>
+							We use the grouped emotion values and the adapt method from the StringLookup layer to form a one hot encoded numeric array representing each sentiment.
+							The output shows a list of the 8 sentiments with the addition of the [UNK] out of vocabulary token. 
+							</br>
+							</br>
+							Lets test our StringLookup layer with a random sentiment from the training data.
+							<blockquote>
+								idx = np.random.randint(test_dataframe.shape[0])
+								</br>
+								sample_label = train_dataframe['grouped_emotions'].iloc[idx]
+								</br>
+								print(f"Original label: {sample_label}")
+								</br>
+								</br>
+								label_binarized = lookup([sample_label])
+								</br>
+								print(f"Label-binarized representation: {label_binarized}")	
+							</blockquote>
+							<a href="images/thumbs/test_lookup.jpg" class="image"><img src="images/thumbs/test_lookup.jpg" alt="" /></a>
+							</br>
+							</br>	
+							Now that we have a one hot encoded array representing each sentiment, we need to create a function that inverts this array back into the string version of the sentiment.
+							</br>
+							</br>
+							<blockquote>
+								def invert_multi_hot(encoded_labels):
+								</br>
+							    <p class="tab">"""Reverse a single multi-hot encoded label to a string vocab term."""
+							    </br>
+							    hot_indices = np.argwhere(encoded_labels == 1.0)[..., 0]
+							    </br>
+							    return np.take(sentiment_vocab, hot_indices)
+							</blockquote>
+							</br>
+							<i>Processing input text</i>
+							</br>
+							Each value from the prompt columns in the training, validation and test data are a sequence of strings representing a users message on Facebook. We need to create a dataset object where we can align the values from the prompt with the sentiment values from the grouped emotions column. We'll use our StringLookup layer in our function to create binary representions of our target labels. For our training dataset we'll shuffle the data to prevent bias when training our model.
+							</br> 
+							</br> 
+							<blockquote>
+								batch_size = 128
+								</br>
+								# function takes a pandas dataframe and returns a tensor.dataset object
+								</br>
+								# with string inputs (messages) and one_hot binary versions of the target labels
+								</br>
+								</br>
+								def make_dataset(dataframe, is_train=True):
+								    <p class="tab">labels = tf.ragged.constant(dataframe["grouped_emotions"].values)
+								    </br>
+								    labels_binarized = [lookup(x).numpy() for x in labels]
+								    </br>
+								    dataset = tf.data.Dataset.from_tensor_slices((dataframe['prompt'].values, labels_binarized))
+								    </br>
+								    dataset = dataset.shuffle(batch_size * 10) if is_train else dataset
+								    </br>
+								    return dataset.batch(batch_size)
+							</blockquote>
+							Implement the make_dataset function for each dataframe   
+							<blockquote>
+								train_dataset = make_dataset(train_dataframe, is_train=True)
+								</br>
+								validation_dataset = make_dataset(valid_dataframe, is_train=False)
+								</br>
+								test_dataset = make_dataset(test_dataframe, is_train=False)
+							</blockquote>
+							Lets see if our function was successful by taking a batch of 5 from our train_dataset and displaying the text input with the associated target label. We'll use the inverted multi-hot function to convert the labels as its string version.
+							<blockquote>
+								text_batch, label_batch = next(iter(train_dataset))
+								</br>
+								for i, text in enumerate(text_batch[:5]):
+								</br>
+								    <p class="tab">label = label_batch[i].numpy()[None, ...]
+								    </br>
+								    print(f"Abstract: {text}")
+								    </br>
+								    print(f"Label: {invert_multi_hot(label[0])}")
+								    </br>
+								    print(" ")
+							</blockquote>
+							<a href="images/thumbs/train_df_display.jpg" class="image"><img src="images/thumbs/train_df_display.jpg" alt="" /></a>							
+							</br>
+							The output shows a batch from our training dataset. The Abstract shows the users message taken from the prompt column. The Label shows the sentiment associated with this message.
+							</br>
+							</br>
+							<h2>Text Vectorization layer: bag of words approach</h2>
+							This process is a basic form of feature engineering that aims to erase encoding differences that you don't want your model to have to deal with. The simplest and most widespread standardization schemes include converting the text to lowercase, removing punctuation characters, and represent each tokenized text in numerical form. All this can be done using the keras TextVectorization layer. The output for this layer depends on your choice for how the text should be represented. There are 2 notable methods for text classification, the bag-of-words approach and the sequence model. In order to determine which method to use, look at the ratio between the number of samples in your training data and the mean number of words per sample. If the ratio is small-less than 1500, then the bag of words model will perform better. If the ratio is higher than 1500 the sequence model works best.  
+							</br> 
+							</br>
+							Let's get the percentile estimates for the sequence lengths of the prompts
+							</br>      
+							<blockquote>
+								train_dataframe["prompt"].apply(lambda x: len(x.split(" "))).describe()
+							</blockquote>
+							<a href="images/thumbs/percent_est.jpg" class="image"><img src="images/thumbs/percent_est.jpg" alt="" /></a>
+							</br> 
+							We see that the average length for each message is about 18 words.
+							</br>
+							<blockquote>
+								# take number of samples in training data and divide by the mean sequence length
+								</br>
+								19307/18
+							</blockquote>	
+							<a href="images/thumbs/ratio.jpg" class="image"><img src="images/thumbs/ratio.jpg" alt="" /></a>
+							</br>
+							We see that the ratio is below 1500. We'll use the bag-of-words approach for text vectorization. Our layers output will return bigrams; tokens representing up to 2 words at a time. We'll also use the TF-IDF metric to give weights to the frequency of common bigram tokens. We'll limit the vocabulary to the 20,000 most frequent words. Otherwise we'd be indexing every word in the training data, potentially tens of thousands of terms that only occur once or twice which is not informative for our model.    
+							</br>
+							</br>
+							<blockquote>
+								max_tokens = 20000
+								</br>
+								auto = tf.data.AUTOTUNE
+								</br>
+								</br>
+								# text vectorization layer for preparing bag of words processing approach
+								</br>
+								text_vectorizer = tf.keras.layers.TextVectorization(
+								    <p class="tab">max_tokens=max_tokens,
+								    </br>
+								    ngrams=2,
+								    </br>
+								    output_mode="tf_idf",
+								    </br>
+								)
+							</blockquote>
+							</br>
+							To build the vocabulary for our model, the TextVectorization layer needs to be adapted using the vocabulary from our training dataset. Our layer is now ready to vectorize the inputs for the training, validation, and test data.
+							<blockquote>
+								# `TextVectorization` layer needs to be adapted as per the vocabulary from our
+								</br>
+								# training set
+								</br>
+								</br>
+								with tf.device("/CPU:0"):
+									</br>
+								    <p class="tab">text_vectorizer.adapt(train_dataset.map(lambda text, label: text))
+							</blockquote>
+							<blockquote>
+								# vectorize the text inputs in our datasets
+								</br>
+								train_dataset = train_dataset.map(
+								   lambda text, label: (text_vectorizer(text), label), num_parallel_calls=auto
+								).prefetch(auto)
+								</br>
+								</br>
+								validation_dataset = validation_dataset.map(
+								   lambda text, label: (text_vectorizer(text), label), num_parallel_calls=auto
+								).prefetch(auto)
+								</br>
+								</br>
+								test_dataset = test_dataset.map(
+								   lambda text, label: (text_vectorizer(text), label), num_parallel_calls=auto
+								).prefetch(auto)
+							</blockquote>
+							Inspect our dataset objects
+							<blockquote>
+								train_dataset
+							</blockquote>  
+							<a href="images/thumbs/train_ds_obj.jpg" class="image"><img src="images/thumbs/train_ds_obj.jpg" alt="" /></a>
+							<blockquote>
+								validation_dataset
+							</blockquote>  
+							<a href="images/thumbs/valid_ds_obj.jpg" class="image"><img src="images/thumbs/valid_ds_obj.jpg" alt="" /></a>
+							</br>
+							We see that our dataset objects now consists of tensors which hold the vectorized representations of the string input messages and their associated binarized target labels. The text vectorization process is now complete. We can now build our deep learning model.     
+							</br>
+							</br>
+							<h2>Build Model</h2>
+							Since we're using a simple bag-of-words approach for our machine learning model, we'll keep the architecture simple to reduce the chances of our model overfitting the training data. The model consists of a regular densely-connected neural network layer with ReLU as the activation function. We'll use 90 units for the output of this layer. To reduce overfitting we'll apply a 0.5 dropout layer. Since our task is a single-label multiclass classification problem, we'll apply the softmax function for our output layer. Our output will be a vector of the probability distribution of the 9 possible sentiments. Remember that we added the UNK out of vocabulary token as a possible sentiment.
+							<blockquote>
+								# create make_model function
+								</br>
+								def make_model(max_tokens=max_tokens):
+								</br>
+								  <p class="tab">inputs = tf.keras.Input(shape=(max_tokens,))
+								  </br>
+								  x = tf.keras.layers.Dense(90, activation='relu')(inputs)
+								  </br>
+								  x = tf.keras.layers.Dropout(0.5)(x)
+								  outputs = tf.keras.layers.Dense(9, activation='softmax')(x)
+								  </br>
+								  model = tf.keras.Model(inputs,outputs)
+								</br>
+								</br>
+								  return model
+							</blockquote>    
+							Call our model and display the summary.
+							<blockquote>
+								our_model = make_model()
+								</br>
+								our_model.summary()
+							</blockquote>
+							<a href="images/thumbs/model_summary.jpg" class="image"><img src="images/thumbs/model_summary.jpg" alt="" /></a>
+							</br>
+							We'll setup the parameters for compiling our model. For the optimizer we'll use a custom RMSprop with a learning rate of 1e-4. Since we have more than 2 label classes, we'll use the categorical crossentropy loss function to compute the loss value between the ground truth label and predicted label. We'll keep track of the categorical accuracy with the model's performance on the validation data and compile the model using 20 epochs; the number of times the dataset passes through the model. We'll save our model to visualize its performance after training.
+							</br>
+							</br>
+							<blockquote>
+								#custom learning rate
+								</br>
+								opt_rmsprop = tf.keras.optimizers.RMSprop(learning_rate=1e-4)
+								</br>
+								epochs = 20
+								</br>
+								</br>
+								our_model.compile(optimizer=opt_rmsprop, loss ='categorical_crossentropy', metrics=['categorical_accuracy'])
+								</br>
+								</br>
+								history = our_model.fit(train_dataset, validation_data=validation_dataset, epochs=epochs)
+							</blockquote>      
+							<a href="images/thumbs/train_model_stage.jpg" class="image"><img src="images/thumbs/train_model_stage.jpg" alt="" /></a>
+							</br>
+							The output display shows the metrics for each epoch during the training process. The categorical_accuracy metric shows how well our model can make predictions on the training data. We want our model to perform well on the validation data so our focus will be on the val_loss and val_categorical_accuracy metrics. At the end of our training stage the val_categorical_accuracy increases to 67 percent. Note that our_model.fit() returns a History object. This object has a member 'history', which is a dictionary containing data for the metrics that were monitored during training. We can use the dictionary to visualize the training process for the model.
+							</br> 
+							</br> 
+							<blockquote>
+								# visualize the training and validation loss 
+								</br>
+								train_loss = history.history['loss']
+								</br>
+								val_loss = history.history['val_loss']
+								</br>
+								plt.plot(train_loss, label = 'training loss')
+								</br>
+								plt.plot(val_loss, label = 'validation loss')
+								</br>
+								plt.legend()
+							</blockquote>
+							<a href="images/thumbs/visualize_loss.jpg" class="image"><img src="images/thumbs/visualize_loss.jpg" alt="" /></a>
+							</br>
+							<blockquote>
+								# visualize the accuracy during training
+								</br>
+								train_accuracy = history.history['categorical_accuracy']
+								</br>
+								val_accuracy = history.history['val_categorical_accuracy']
+								</br>
+								plt.plot(train_accuracy, label='training accuracy')
+								</br>
+								plt.plot(val_accuracy, label='validation accuracy'
+								</br>
+								plt.legend()
+							</blockquote>
+							<a href="images/thumbs/visualize_accuracy.jpg" class="image"><img src="images/thumbs/visualize_accuracy.jpg" alt="" /></a>
+							</br>
+							Let's evaluate our model using the test data. 
+							</br>
+							</br>
+							<blockquote>
+								_, categorical_acc = our_model.evaluate(test_dataset)
+								</br>
+								print(f"Categorical accuracy on the test set: {round(categorical_acc * 100, 2)}%.")
+							</blockquote>
+							<a href="images/thumbs/eval_test_data.jpg" class="image"><img src="images/thumbs/eval_test_data.jpg" alt="" /></a>
+							</br>
+							We see that our model has a ~67% accuracy in correctly predicting the emotion from a users Facebook message in the test data. For the final stage of our project, we'll test our model on raw string messages.
+							</br>
+							</br> 
+							<h2>Inference</h2>
+							An important feature of the preprocessing layers provided by Keras is that they can be included inside a tf.keras.Model. We will export an inference model by including the text_vectorization layer on top of our_model. This will allow our inference model to directly operate on raw strings.
+							</br>
+							</br>
+							<blockquote>
+								# inference stage
+								</br>
+								for i, text in enumerate(text_batch[:5]):
+									</br>
+								    <p class="tab">label = label_batch[i].numpy()[None, ...]
+								    </br>
+								    print(f"Abstract: {text}")
+								    </br>
+								    print(f"Label(s): {invert_multi_hot(label[0])}")
+								    </br>
+								    predicted_proba = [proba for proba in predicted_probabilities[i]]
+								    </br>
+								    predicted_label = [
+								    	</br>
+								        x
+								        </br>
+								        for _, x in sorted(
+								        	</br>
+								            &nbsp&nbsp&nbspzip(predicted_probabilities[i], lookup.get_vocabulary()),
+								            </br>
+								            &nbsp&nbsp&nbspkey=lambda pair: pair[0],
+								            </br>
+								            &nbsp&nbsp&nbspreverse=True,
+								            </br>
+								        )
+								        </br>
+								    ][:1]
+								    </br>
+								    print(f"Predicted Label(s): ({', '.join([label for label in predicted_label])})")
+								    </br>
+								    print(" ")
+							</blockquote>
+							<a href="images/thumbs/inference_testing.jpg" class="image"><img src="images/thumbs/inference_testing.jpg" alt="" /></a>
+							The prediction results are not perfect but not below the par for a simple model like ours. We can improve this performance with models that consider word order like LSTM or even those that use Transformers or word-embedding layers.  
+							
+
+			</div>
+
+		<!-- Footer -->
+			<footer id="footer">
+				<div class="inner">
+					<ul class="icons">
+						<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+						<li><a href="#" class="icon brands fa-github"><span class="label">Github</span></a></li>
+						<li><a href="#" class="icon brands fa-dribbble"><span class="label">Dribbble</span></a></li>
+						<li><a href="#" class="icon solid fa-envelope"><span class="label">Email</span></a></li>
+					</ul>
+					<ul class="copyright">
+						<li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+					</ul>
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.poptrox.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

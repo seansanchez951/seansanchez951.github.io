@@ -1,0 +1,403 @@
+<!DOCTYPE HTML>
+<!--
+	Phantom by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Story - Phantom by HTML5 UP</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+
+							<!-- Logo -->
+								<a href="index.html" class="logo">
+									<span class="symbol"><img src=".\images\pitchfork_logo.jpeg" alt="" /></span><span class="title">Best Year In Music</span>
+								</a>
+
+							<!-- Nav -->
+								<nav>
+									<ul>
+										<li><a href="#menu">Menu</a></li>
+									</ul>
+								</nav>
+
+						</div>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<h2>Menu</h2>
+						<ul>
+							<li><a href="index.html">Home</a></li>
+							<li><a href="story.html">Story</a></li>
+							<li><a href="behind-data.html">Behind the Data</a></li>
+							<li><a href="best-year-music.html">Best Year in Music</a></li>
+							<li><a href="trends-in-music.html">Trends in Music</a></li>
+							<li><a href="pfk-fav-genre.html">Pitchfork's Favorite Genre</a></li>
+							<li><a href="sources.html">Sources - Links</a></li>
+							
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+							<h1>Year in which Pitchfork’s overall ratings has the highest percentage</h1>
+							<span class="image main"><img src=".\images\years-music.jpg" alt="" /></span>
+							<p>The first objective considered during the initial stages of the project was to find out which
+							year of publication did Pitchfork give the "best" reviews. Since the data is for music reviews that were 
+							published between the years 1999-2021, there will be 23 seperate elements to consider. By aggregating the data
+							I was able to calculate the average review scores for each year. In order to better show the rank of each year 
+							I sorted the values in descending order. I implemented a lollipop chart to draw more attention to the data values.
+							</p>
+							
+							<body>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+<!-- Create a div where the graph will take place -->
+<div id="lollipop"></div>
+<!-- Add 2 buttons to change order -->
+<button onclick="update(1)">Sort By Rank</button>
+<button onclick="update(2)">Sort By Year</button>
+
+<script>
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 40, right: 30, bottom: 40, left: 100},
+        width = 650 - margin.left - margin.right,
+        height = 450 - margin.top - margin.bottom;
+
+    // Select the SVG canvas, specify the margin, and initialize the width & height variables
+    var svg = d3.select("#lollipop").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+
+
+    // This group is what the x-axis, y-axis, and the elements are attached to. It contains the other 3 groups.
+    var container_g = svg.append("g")
+        .attr("transform",
+            "translate(" + margin.left + ", " + margin.top + ")");
+
+
+    function update(flag) {
+
+        d3.csv("./data_files/pfk-avg-score-per-year.csv").then(data => {
+
+            // console.log(data)
+
+            // create if statement to sort the data
+            if (flag === 1) {
+
+                svg.selectAll("line").remove();
+                svg.selectAll("myline").remove();
+                svg.selectAll("circle").remove();
+                svg.selectAll("mycircle").remove();
+                svg.selectAll("text").remove();
+
+
+                // sort data from highest score to lowest
+                data.sort(function(b, a) {
+                    return a.score - b.score;
+                });
+
+                svg.append("text")
+                    .attr("transform", "translate(100, 0)")  // Position the title on the SVG element
+                    .attr("x", 135)
+                    .attr("y", 30)
+                    .attr("font-size", "23px")
+                    .text("Average Review Score Per Year")
+
+
+                // Add X axis
+                var x = d3.scaleLinear()
+                    .domain([0, 10])
+                    .range([0, width]);
+                container_g.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(x))
+                    .append("text")
+                    .attr("x", 280)
+                    .attr("y", 35)
+                    .attr("stroke", "black")
+                    .attr("font-size", "16px")
+                    .text("Review Score"); // Specify the Label for the x-axis
+
+
+                // Add Y axis
+                var y = d3.scaleBand()
+                    .domain(data.map(function (d) {
+                        return d.year;
+                    }))
+                    .range([0, height])
+                    .padding(1);
+                container_g.append("g")
+                    .call(d3.axisLeft(y))
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 25) // Specify the y-position of the axis
+                    .attr("x", -150) // Specify the x-position of the axis
+                    .attr("dy", "-5.1em")
+                    .attr("stroke", "black")
+                    .attr("font-size", "16px")
+                    .text("Year");
+
+
+                // apply loading interaction start lines and circles at 0
+
+                // Lines
+                container_g.selectAll("myline")
+                    .data(data)
+                    .enter()
+                    .append("line")
+                    .attr("x1", function (d) {
+                        return x(0);
+                    })
+                    .attr("x2", x(0))
+                    .attr("y1", function (d) {
+                        return y(d.year);
+                    })
+                    .attr("y2", function (d) {
+                        return y(d.year);
+                    })
+                    .attr("stroke", "grey")
+
+
+                // Circles
+                container_g.selectAll("mycircle")
+                    .data(data)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) {
+                        return x(0);
+                    })
+                    .attr("cy", function (d) {
+                        return y(d.year);
+                    })
+                    .attr("r", "6")
+                    .style("fill", "#69b3a2")
+                    .attr("stroke", "black")
+
+
+                // change the X coordinates of line and circles
+                container_g.selectAll("circle")
+                    .transition()
+                    .duration(2000)
+                    .attr("cx", function(d) { return x(d.score); })
+
+                container_g.selectAll("line")
+                    .transition()
+                    .duration(2000)
+                    .attr("x1", function(d) { return x(d.score); })
+
+                // to format values rounding two decimal places
+                let format = d3.format(".2f");
+
+                // add review score text at the end of values
+                container_g.append("g")
+                    .attr("font-family", "sans-serif")
+                    .attr("font-size", 10)
+                    .selectAll("text")
+                    .data(data)
+                    .join("text")
+                    .attr("text-anchor", d => d.value < 0 ? "end" : "start")
+                    .attr("x", d => x(d.score) + Math.sign(d.score - 0) * 8)
+                    .attr("y", function(d) {return y(d.year); })
+                    .attr("dy", "0.35em")
+                    .text(d => format(d.score));
+
+
+            // else: sort order from most recent year up top to oldest year on bottom
+            } else {
+
+                svg.selectAll("line").remove();
+                svg.selectAll("myline").remove();
+                svg.selectAll("circle").remove();
+                svg.selectAll("mycircle").remove();
+                svg.selectAll("text").remove();
+
+
+                // sort data from most recent year to oldest
+                data.sort(function(b, a) {
+                    return a.year - b.year;
+                });
+
+                svg.append("text")
+                    .attr("transform", "translate(100, 0)")  // Position the title on the SVG element
+                    .attr("x", 135)
+                    .attr("y", 30)
+                    .attr("font-size", "23px")
+                    .text("Average Review Score Per Year")
+
+                // Add X axis
+                var x = d3.scaleLinear()
+                    .domain([0, 10])
+                    .range([0, width]);
+                container_g.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(x))
+                    .append("text")
+                    .attr("x", 280)
+                    .attr("y", 35)
+                    .attr("stroke", "black")
+                    .attr("font-size", "16px")
+                    .text("Review Score"); // Specify the Label for the x-axis
+
+
+                // Add Y axis
+                var y = d3.scaleBand()
+                    .domain(data.map(function (d) {
+                        return d.year;
+                    }))
+                    .range([0, height])
+                    .padding(1);
+                container_g.append("g")
+                    .call(d3.axisLeft(y))
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 25) // Specify the y-position of the axis
+                    .attr("x", -150) // Specify the x-position of the axis
+                    .attr("dy", "-5.1em")
+                    .attr("stroke", "black")
+                    .attr("font-size", "16px")
+                    .text("Year");
+
+
+                // apply loading interaction start lines and circles at 0
+
+                // Lines
+                container_g.selectAll("myline")
+                    .data(data)
+                    .enter()
+                    .append("line")
+                    .attr("x1", function (d) {
+                        return x(0);
+                    })
+                    .attr("x2", x(0))
+                    .attr("y1", function (d) {
+                        return y(d.year);
+                    })
+                    .attr("y2", function (d) {
+                        return y(d.year);
+                    })
+                    .attr("stroke", "grey")
+
+
+                // Circles
+                container_g.selectAll("mycircle")
+                    .data(data)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) {
+                        return x(0);
+                    })
+                    .attr("cy", function (d) {
+                        return y(d.year);
+                    })
+                    .attr("r", "6")
+                    .style("fill", "#69b3a2")
+                    .attr("stroke", "black")
+
+
+                // change the X coordinates of line and circles
+                container_g.selectAll("circle")
+                    .transition()
+                    .duration(2000)
+                    .attr("cx", function(d) { return x(d.score); })
+
+                container_g.selectAll("line")
+                    .transition()
+                    .duration(2000)
+                    .attr("x1", function(d) { return x(d.score); })
+
+                // to format values
+                let format = d3.format(".2f");
+
+                // add review score text at the end of values
+                container_g.append("g")
+                    .attr("font-family", "sans-serif")
+                    .attr("font-size", 10)
+                    .selectAll("text")
+                    .data(data)
+                    .join("text")
+                    .attr("text-anchor", d => d.value < 0 ? "end" : "start")
+                    .attr("x", d => x(d.score) + Math.sign(d.score - 0) * 8)
+                    .attr("y", function(d) {return y(d.year); })
+                    .attr("dy", "0.35em")
+                    .text(d => format(d.score));
+
+            }
+
+        })
+
+    }
+    // initialize plot
+    update(1);
+
+</script>
+</body>
+							<p>From the lollipop chart we see that surprisingly Pitchfork has rated 2021 as the best reviewed
+							year in music with an average review score of 7.22. The year 2020 was a close second with 7.20 and 2001
+							was the third highest at 7.16. Some notable albums from the year 2021 was Tyler the Creator: Call Me If You Get Lost,
+							L’Rain: Fatigue, and Jazmine Sullivan: Heaux Tales. What stood out the most from this visualization was how close
+							the average scores were for each year, ranging from 6.6 - 7.2. For clarity I added two interactive buttons to sort the order
+							of the chart. From score rank to order by year.</p>
+						</div>
+						
+					</div>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<div class="inner">
+							<section>
+								<h2>Get in touch</h2>
+								<form method="post" action="#">
+									<div class="fields">
+										<div class="field half">
+											<input type="text" name="name" id="name" placeholder="Name" />
+										</div>
+										<div class="field half">
+											<input type="email" name="email" id="email" placeholder="Email" />
+										</div>
+										<div class="field">
+											<textarea name="message" id="message" placeholder="Message"></textarea>
+										</div>
+									</div>
+									<ul class="actions">
+										<li><input type="submit" value="Send" class="primary" /></li>
+									</ul>
+								</form>
+							</section>
+							<section>
+								<h2>Follow</h2>
+								<ul class="icons">
+									<li><a href="#" class="icon brands style2 fa-github"><span class="label">GitHub</span></a></li>
+								</ul>
+							</section>
+							<ul class="copyright">
+								<li>&copy; Untitled. All rights reserved</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

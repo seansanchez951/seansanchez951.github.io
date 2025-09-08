@@ -1,0 +1,123 @@
+<!DOCTYPE HTML>
+<!--
+	Phantom by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Story - Phantom by HTML5 UP</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+
+							<!-- Logo -->
+								<a href="index.html" class="logo">
+									<span class="symbol"><img src=".\images\pitchfork_logo.jpeg" alt="" /></span><span class="title">Trends in Music</span>
+								</a>
+
+							<!-- Nav -->
+								<nav>
+									<ul>
+										<li><a href="#menu">Menu</a></li>
+									</ul>
+								</nav>
+
+						</div>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<h2>Menu</h2>
+						<ul>
+							<li><a href="index.html">Home</a></li>
+							<li><a href="story.html">Story</a></li>
+							<li><a href="behind-data.html">Behind the Data</a></li>
+							<li><a href="best-year-music.html">Best Year in Music</a></li>
+							<li><a href="trends-in-music.html">Trends in Music</a></li>
+							<li><a href="pfk-fav-genre.html">Pitchfork's Favorite Genre</a></li>
+							<li><a href="sources.html">Sources - Links</a></li>
+							
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+							<h1>Pitchfork highest reviewed music genre</h1>
+							
+							<video width="820" height="440" autoplay muted>
+  							<source src=".\images\genres-vid.mp4" type="video/mp4">
+							</video>
+							
+							
+							<p>The last objective was to determine which music genre on Pitchfork's website received the most "good" reviews. This can be calculated by using aggregate data and finding the average review scores across each genre. In the early stages of the project I discovered that the average scores for each genre were close to equal. This made implementing ordered proportional symbols problamatic and would be difficult for the user to interpret. I pivoted the visualization to a static treemap for the final release.      
+							</p>
+							
+							<div id="treemap"></div>
+							
+
+							<p>The treemap reveals that Pitchfork writers tend to favor global music albums with an average review score of 7.35. Some notable Global music albums include Caetano Veloso: Livro, MIA: Kala, and Lee Scratch Perry: Ape-ology. Similar to the lollipop chart, the treemap reveals how closely the average review scores are for each music genre. The difference between the highest and lowest average score is only 0.45. Users can highlight over each treemap node to visibility purposes.       
+							</p> 
+							
+						</div>
+						
+					</div>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<div class="inner">
+							<section>
+								<h2>Get in touch</h2>
+								<form method="post" action="#">
+									<div class="fields">
+										<div class="field half">
+											<input type="text" name="name" id="name" placeholder="Name" />
+										</div>
+										<div class="field half">
+											<input type="email" name="email" id="email" placeholder="Email" />
+										</div>
+										<div class="field">
+											<textarea name="message" id="message" placeholder="Message"></textarea>
+										</div>
+									</div>
+									<ul class="actions">
+										<li><input type="submit" value="Send" class="primary" /></li>
+									</ul>
+								</form>
+							</section>
+							<section>
+								<h2>Follow</h2>
+								<ul class="icons">
+									<li><a href="#" class="icon brands style2 fa-github"><span class="label">GitHub</span></a></li>
+								</ul>
+							</section>
+							<ul class="copyright">
+								<li>&copy; Untitled. All rights reserved</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script src="https://d3js.org/d3.v7.min.js"></script>
+			<script src="assets/js/treemap.js"></script>
+			
+
+	</body>
+</html>

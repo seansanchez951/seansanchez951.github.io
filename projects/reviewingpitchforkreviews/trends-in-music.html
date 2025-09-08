@@ -1,0 +1,130 @@
+<!DOCTYPE HTML>
+<!--
+	Phantom by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Story - Phantom by HTML5 UP</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+
+							<!-- Logo -->
+								<a href="index.html" class="logo">
+									<span class="symbol"><img src=".\images\pitchfork_logo.jpeg" alt="" /></span><span class="title">Trends in Music</span>
+								</a>
+
+							<!-- Nav -->
+								<nav>
+									<ul>
+										<li><a href="#menu">Menu</a></li>
+									</ul>
+								</nav>
+
+						</div>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<h2>Menu</h2>
+						<ul>
+							<li><a href="index.html">Home</a></li>
+							<li><a href="story.html">Story</a></li>
+							<li><a href="behind-data.html">Behind the Data</a></li>
+							<li><a href="best-year-music.html">Best Year in Music</a></li>
+							<li><a href="trends-in-music.html">Trends in Music</a></li>
+							<li><a href="pfk-fav-genre.html">Pitchfork's Favorite Genre</a></li>
+							<li><a href="sources.html">Sources - Links</a></li>
+							
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+							<h1>Album review scores from 1999-2021</h1>
+							<span class="image main"><img src=".\images\review-trends.jpg" alt="" /></span>
+							<p>The next objective is to create a visualization that would 
+								encapsulate every album review score from 1999 to 2021. 
+								These scores would be projected over time along the horizontal axis. 
+								With a database of well over 20,000 music reviews, the task proved to be challenging. 
+								The initial goal was to create a multi-line chart where review scores were separated by the nine different music genres provided by Pitchfork's website. 
+								Users can then discover trends within each music genre in Pitchfork's publication history. 
+								Because the dataset was too unwieldy to provide a clear multi-line chart, the visualization pivoted to a bubble/multi-line hybrid chart. 
+								An interactive legend to switch between bubbles to lines for the different music genres can help the user filter through any visual clutter.
+							</p>
+							
+							<div id="bubble-multi-line"></div>
+							
+
+							<p>The visualization initially displays different colored bubbles for the 9 types of music genres. 1 bubble represents 1 album's review score.
+							Rock albums appear to dominate the domain space by the immense amount of blue bubbles appearing in the visualization. This is due to
+							fact that Pitchfork started as an independent music blog that focused solely on indie-rock music. In order to combat the visual 
+							clutter the user can click on the dots next to the legends to hide the bubbles associated to each music genre. Whats noticeable is the variance of
+							review scores given to albums during Pitchforks early years of publication. As the years of publication become more recent the bubbes merge closer
+							to the average review score for that genre. By hovering over the text on the legend the bubbles for that genre becomed grayed out and a line
+							path appears across the horizontal axis. These line paths are formulated my taking the average review score per month for each music genre. The lines
+							also confirm the observation of the large variance of review scores during the early years of Pitchfork's publication.</p>
+						</div>
+						
+					</div>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<div class="inner">
+							<section>
+								<h2>Get in touch</h2>
+								<form method="post" action="#">
+									<div class="fields">
+										<div class="field half">
+											<input type="text" name="name" id="name" placeholder="Name" />
+										</div>
+										<div class="field half">
+											<input type="email" name="email" id="email" placeholder="Email" />
+										</div>
+										<div class="field">
+											<textarea name="message" id="message" placeholder="Message"></textarea>
+										</div>
+									</div>
+									<ul class="actions">
+										<li><input type="submit" value="Send" class="primary" /></li>
+									</ul>
+								</form>
+							</section>
+							<section>
+								<h2>Follow</h2>
+								<ul class="icons">
+									<li><a href="#" class="icon brands style2 fa-github"><span class="label">GitHub</span></a></li>
+								</ul>
+							</section>
+							<ul class="copyright">
+								<li>&copy; Untitled. All rights reserved</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script src="https://d3js.org/d3.v7.min.js"></script>
+			<script src="assets/js/bubble-multi-line.js"></script>
+			
+
+	</body>
+</html>

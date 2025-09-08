@@ -1,0 +1,973 @@
+<!DOCTYPE HTML>
+<!--
+	Strata by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Strata by HTML5 UP</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Header -->
+			<header id="header">
+				<div class="inner">
+					<a href="#" class="image avatar"><img src="images/thumbs/europe.jpg" alt="" /></a>
+					<h1><strong>Machine Learning · Neural Networks</strong><br />
+					<br />
+					</a></h1>
+				</div>
+			</header>
+
+		<!-- Main -->
+			<div id="main">
+
+				<!-- One -->
+					<section id="one">
+						<header class="major">
+							<h2>How many cells appear in a given microscopy image?</h2>
+						</header>
+						<p>The goal for this project is to create a neural network for segmenting the cell nuclei within a microscopy image. We’ll use Python’s Tensorflow and Keras libraries to implement a U-Net architecture and train a neural network to highlight the nuclei in images of cells. 
+							We’ll then count the number of cells in each image using the cv2 library and build a pandas database to store the results.
+							</br>
+							</br>
+						Note: You can find the accompanying code in the Colab Notebook link below. I highly encourage you to fork it, tweak the parameters, or try the model with your own dataset!
+				</br>
+		<li><a href="https://colab.research.google.com/drive/1x46XUqWK0--4bAo5yw1oozMTFs00R4Qn?usp=sharing">ML U-Net Project Colab Notebook</a></li>
+						</br>
+	</p>
+					</section>
+
+				<!-- Two -->
+					<section id="two">
+						<h2>The Data</h2>
+						<p>The data for this project was collected from the Schroeder lab at the University of San Francisco. The file format is a numpy .npz format which provides storage of array data using gzip compression. The link to download the raw data and test images can be found here.
+						</br>
+						<li><a href="https://drive.google.com/file/d/1MXNocfe0Cf1f0ceIxzLwcX3fGUz6J3Ky/view?usp=sharing">Raw data to train model</a></li>
+						</br>
+						<li><a href="https://drive.google.com/file/d/1sVzM3hsj4qGihunxeVhJWvdHAocCF8NL/view?usp=sharing">Test images to make predictions after model is trained</a></li>
+						</p>
+
+						<h2>Why use a U-Net?</h2>
+						<p>U-Net is a convolutional network architecture for fast and precise segmentation of images. Many convolutional networks used for classification tasks output a single class label per image. However, for visual tasks like biomedical image processing, the desired output should include localization. The U-Net architecture  assigns a class label to each pixel in the image, which allows us to highlight the subarea of the image representing a cell. 
+						</p>
+
+						<li><a href="https://drive.google.com/file/d/16ceTU7ichaYO1bRzGDZ688iihOIYbsds/view?usp=sharing">U-Net Documentation</a></li>
+						</br>
+						<h2>Setup</h2>
+
+						<p>Using a Google Colab notebook for this project. Import libraries and load files  through google drive.
+							<blockquote># import libraries
+										</br>
+										import numpy as np
+										</br>
+										import matplotlib.pyplot as plt
+										</br>
+										import tensorflow as tf
+										</br>
+										import sklearn as sk
+										</br>
+										import sklearn.model_selection
+										</br>
+										import tensorflow_datasets
+							</blockquote>
+							<blockquote>
+								from google.colab import drive
+								</br>
+								drive.mount('/content/gdrive')
+								</br>
+								</br>
+								npzfile = np.load('/content/gdrive/MyDrive/X_and_y.npz')
+							</blockquote>
+
+
+							Explore the array data
+							<blockquote>
+								npzfile.files
+							</blockquote>
+							<a href="images/thumbs/files_output.jpg" class="image"><img src="images/thumbs/files_output.jpg" alt="" /></a>
+
+							</br>
+							Split the data X and y into numpy arrays. X contains the microscopy images of cells. y contains highlighting 'masks' which identify the cell nuclei.
+							<blockquote>
+								X = npzfile['X']
+								</br>
+								y = npzfile['y']
+							</blockquote>
+							<h2>Explore the data</h2>
+							<p>
+								Check data types and numpy values for the image and highlighting mask data
+								<blockquote>
+									# max value is 255.0
+									</br>
+									np.max(X)
+									</br>
+									type(X)
+									</br>
+									X.shape
+									</br>
+									type(y)
+									</br>
+									y.shape
+								</blockquote>
+								X.shape returns the output (2000, 128, 128) Meaning the X numpy array contains 2000 images, each with 128 rows and 128 columns. y.shape returns the output (2000, 128, 128) meaning the y numpy array contains 2000 images with 128 rows and columns. 
+							</p>
+							<p>
+								Lets use the matplotlib library to show an image along with the highlighted mask
+								<blockquote>
+									idx = 7
+									</br>
+									plt.imshow(X[idx]/255, cmap = 'gray')
+									</br>
+									plt.figure()
+									</br>
+									plt.imshow(y[idx])
+								</blockquote>
+								<a href="images/thumbs/cell_image_above_mask_1.jpg" class="image"><img src="images/thumbs/cell_image_above_mask_1.jpg" alt="" /></a>
+								</br>
+								The grayscale image is X, showing the microscopy image of cells. The colored image below is y, showing the corresponding ground truth labels highlighting the cell nuclei.
+								</br>
+								</br>
+								Let's superimpose the X image with the ground truth labels in y.
+								<blockquote>
+									idx = 7
+									</br>
+									plt.imshow(X[idx]/255 + .25*y[idx], cmap = 'gray')		
+								</blockquote>
+								</br>
+								<a href="images/thumbs/superimposed_image1.jpg" class="image"><img src="images/thumbs/superimposed_image1.jpg" alt="" /></a>
+								</br>
+								We see the highlighted masks surrounding the cells.
+							</p>
+
+							<h2>Build the U-Net</h2>
+
+							
+							Split X and y into training and test data.
+							Then create keras dataset objects using the split data. The batch size refers to the number of samples that will be propagated through the network. The batch size for this project will be 16. 
+							<blockquote>
+								X_train, X_val, y_train, y_val = sk.model_selection.train_test_split(X, y, random_state=123)
+								</br>
+								</br>
+								data_train = tf.data.Dataset.from_tensor_slices((X_train,y_train)).batch(16)
+								</br>
+								data_val = tf.data.Dataset.from_tensor_slices((X_val,y_val)).batch(16)
+							</blockquote>
+						</p>
+						<p>
+							The U-Net architecture consists of a contracting path and an expansive path. We'll split the code for the model by these two paths.
+							<a href="images/thumbs/U-Net Image.jpg" class="image"><img src="images/thumbs/U-Net Image.jpg" alt="" /></a> 
+							</br>
+							</br>
+							<i>Contracting Path</i>
+							</br>
+							The contracting path consists of the input layer as well as the repeated application of two 3x3 padded convolutions, each followed by a ReLU activation function and a 2x2 max pooling operation with stride 2 for downsampling. For each downsampling step we double the number of feature channels. 
+							</br>
+							</br>
+							Create the input layer with the same shape of X (128, 128, 1). The value for the third parameter is 1 because its a gray scale image.
+							<blockquote>
+							inputs = tf.keras.Input(shape=(128,128,1))
+							</blockquote>	
+							</br>
+							Plug the input layer into the first 2D convolution. We'll start with 64 filters, kernal size 3x3, and apply the ReLU activation function. Make sure to make padding = 'same' to make the output layer the same size as the input. Repeat for the second layer.   
+							</br>
+							</br>
+							<blockquote>
+								# 1st 2D Conv layer
+								</br>
+								x = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu', padding ='same')(inputs)
+								</br>
+								</br>
+								# 2nd layer: half of these filters will be used for 4th upsampling 2D Conv layer
+								</br>
+								x_skip1 = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu', padding ='same')(x) 
+							</blockquote>
+							Apply first 2x2 max pooling operation. Plugging in the previous 2D convolutional layer. 
+							<blockquote>
+								# 1st max pooling 2x2 layer
+								</br>
+								max1 = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x_skip1)
+							</blockquote>
+							Double the amount of filters for the third and forth convolutional layer
+							<blockquote>
+								# 3rd layer
+								</br>
+								x = tf.keras.layers.Conv2D(filters=128, kernel_size=(3,3), activation='relu', padding ='same')(max1)
+								</br> 
+								</br> 
+								# 4th layer: half of these filters will be used for 3rd upsampling 2D Conv layer
+								</br>
+								x_skip2 = tf.keras.layers.Conv2D(filters=128, kernel_size=(3,3), activation='relu', padding ='same')(x)
+							</blockquote>
+							Apply second max pooling operation.
+							<blockquote>
+								# 2nd max pooling 2x2 layer
+								</br>
+								max2 = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x_skip2)
+							</blockquote>
+							Double the amount of filters for the fifth and sixth convolutional layer.
+							<blockquote>
+								# 5th layer
+								</br> 
+								x = tf.keras.layers.Conv2D(filters=256, kernel_size=(3,3), activation='relu', padding ='same')(max2)
+								</br>
+								</br>
+								# 6th layer: half of these filters will be used for 2nd upsampling 2D Conv layer
+								</br>
+								x_skip3 = tf.keras.layers.Conv2D(filters=256, kernel_size=(3,3), activation='relu', padding ='same')(x)
+							</blockquote>
+							Apply third max pooling operation.
+							<blockquote>
+								# 3rd max pooling 2x2 layer
+								</br> 
+								max3 = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x_skip3)
+							</blockquote>
+							Double the filters for the seventh and eighth convolutional layer.
+							<blockquote>
+								# 7th layer
+								</br> 
+								x = tf.keras.layers.Conv2D(filters=512, kernel_size=(3,3), activation='relu', padding ='same')(max3)
+								</br> 
+								</br> 
+								# 8th layer: half of these filters will be used for 1st upsampling 2D Conv layer
+								</br>
+								x_skip4 = tf.keras.layers.Conv2D(filters=512, kernel_size=(3,3), activation='relu', padding ='same')(x)
+							</blockquote>
+							Apply forth (and final) max pooling operation.
+							<blockquote>
+								# 4th max pooling 2x2 layer
+								</br> 
+								max4 = tf.keras.layers.MaxPool2D(pool_size=(2,2))(x_skip4)	
+							</blockquote>
+							Double the filters for the ninth and tenth layer. These will be the final pair of 2D Convolutional layers for the contracting path.
+							<blockquote>
+								# 9th layer
+								x = tf.keras.layers.Conv2D(filters=1024, kernel_size=(3,3), activation='relu', padding ='same')(max4)
+								</br>
+								</br>
+								# 10th layer: final layer for contracting path
+								</br>
+								x = tf.keras.layers.Conv2D(filters=1024, kernel_size=(3,3), activation='relu', padding ='same')(x)
+							</blockquote>
+							<i>Expansive Path</i>
+							</br>
+							</br>
+							Every step in the expansive path consists of an upsampling of filters followed by a 2x2 convolution that halves the number of filters, a concatenation with the correspondingly cropped filters from the contracting path, and two 3x3 convolutions, each followed by a ReLU activation function. The cropping is necessary due to the loss of border pixels in every convolution. We'll keep the padding parameter as 'same' so the output layer will have the same shape as the input.
+							</br>
+							</br>
+							Create first upsampling 2D layer, plugging in the previous convolutional layer
+							<blockquote>
+								up1 = tf.keras.layers.UpSampling2D(size=(2, 2))(x)
+							</blockquote>
+							Create 2D convolutional layer using half of the filters from the previous layer. The previous layer has 1024 filters so this layer will have 512.
+							<blockquote>
+								up1 = tf.keras.layers.Conv2D(filters=512, kernel_size=(3,3), activation='relu', padding ='same')(up1)
+							</blockquote> 
+							Concatenate the corresponding filters from the 2D convolutional layer in the contracting path.
+							<blockquote>
+								x = tf.keras.layers.Concatenate(axis=-1)([up1, x_skip4])
+							</blockquote>
+							Now apply two 3x3 convolutional layers with half of the filters from the previous layer
+							<blockquote>
+								# 11th layer
+								</br>
+								x = tf.keras.layers.Conv2D(filters=512, kernel_size=(3,3), activation='relu', padding ='same')(x)
+								</br>
+								</br>
+								# 12th layer
+								</br> 
+								x = tf.keras.layers.Conv2D(filters=512, kernel_size=(3,3), activation='relu', padding ='same')(x)
+							</blockquote>
+							Create second upsampling 2D layer
+							<blockquote>
+								up2 = tf.keras.layers.UpSampling2D(size=(2, 2))(x)
+							</blockquote>
+							Create 2D convolutional layer. Using half of the filters from the previous layer.
+							<blockquote>
+								up2 = tf.keras.layers.Conv2D(filters=256, kernel_size=(3,3), activation='relu', padding ='same')(up2)
+							</blockquote>
+							Repeat concatenation step using filters from corresponding convolutional layer from the contracting path.
+							<blockquote>
+								x = tf.keras.layers.Concatenate(axis=-1)([up2, x_skip3])
+							</blockquote>
+							Apply pair of 3x3 convolutional layers with half of the filters from the previous layer.
+							<blockquote>
+								# 13th layer
+								</br>
+								x = tf.keras.layers.Conv2D(filters=256, kernel_size=(3,3), activation='relu', padding ='same')(x)
+								</br>
+								</br>
+								# 14th layer
+								</br> 
+								x = tf.keras.layers.Conv2D(filters=256, kernel_size=(3,3), activation='relu', padding ='same')(x)
+							</blockquote>
+							Create third upsampling 2D layer.
+							<blockquote>
+								up3 = tf.keras.layers.UpSampling2D(size=(2, 2))(x)
+							</blockquote>
+							Create 2D convolutional layer. Using half of the filters from the previous layer.
+							<blockquote>
+								up3 = tf.keras.layers.Conv2D(filters=128, kernel_size=(3,3), activation='relu', padding ='same')(up3)
+							</blockquote>
+							Repeat concatenation step using filters from corresponding convolutional layer from the contracting path.
+							<blockquote>
+								x = tf.keras.layers.Concatenate(axis=-1)([up3, x_skip2])
+							</blockquote>
+							Apply pair of 3x3 convolutional layers using half of the filters from the previous layer.
+							<blockquote>
+								# 15th layer
+								</br>
+								x = tf.keras.layers.Conv2D(filters=128, kernel_size=(3,3), activation='relu', padding ='same')(x)
+								</br>
+								</br>
+								# 16th layer 
+								</br>
+								x = tf.keras.layers.Conv2D(filters=128, kernel_size=(3,3), activation='relu', padding ='same')(x)
+							</blockquote>
+							Create forth (and final) upsampling 2D layer.
+							<blockquote>
+								up4 = tf.keras.layers.UpSampling2D(size=(2, 2))(x)
+							</blockquote>
+							Create 2D convolutional layer. Using half of the filters from the previous layer.
+							<blockquote>
+								up4 = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu', padding ='same')(up4)
+							</blockquote>
+							Repeat concatenation step using filters from corresponding convolutional layer from the contracting path.
+							<blockquote>
+								x = tf.keras.layers.Concatenate(axis=-1)([up4, x_skip1])
+							</blockquote>
+							Apply last pair of 3x3 convolutional layers using half of the filters from the previous layer.
+							<blockquote>
+								# 17th layer
+								</br>
+								x = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu', padding ='same')(x)
+								</br>
+								</br>
+								# 18th layer
+								</br> 
+								x = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu', padding ='same')(x)
+							</blockquote>
+
+							Dropout layer: A dropout layer is an effective regularization technique for neural networks. When applied to a layer, dropout randomly sets to zero a number of output features during training. This helps prevent the model from overfitting.
+							<blockquote>
+								# apply dropout layer by 50%
+								</br> 
+								x = tf.keras.layers.Dropout(0.5)(x)
+							</blockquote>
+							We want the output for our network to be one single image. So apply the filter parameter equal to 1, with kernal size (1,1). Our activation function will change to the sigmoid function to return a value between 0 and 1. We keep the padding parameter as 'same'. 
+							<blockquote>
+								outputs = tf.keras.layers.Conv2D(filters=1, kernel_size=(1,1), activation='sigmoid', padding='same')(x)  
+							</blockquote> 
+							<h2>Setup and Train the Model</h2>
+							Use the inputs and outputs variables for the parameters of the model.
+							<blockquote>
+								model = tf.keras.Model(inputs, outputs)
+							</blockquote>
+							Create a learning rate variable for training the model. This determines the step size at each iteration while moving toward a minimum of a loss function. We want this value to be very small.
+							<blockquote>
+								opt = tf.keras.optimizers.RMSprop(learning_rate=1e-4)
+							</blockquote>
+							Compile the model using the learning rate variable for the optimizer. Because our target values are between 0 and 1, we'll use binary crossentropy for our loss function. We'll also monitor the accuracy during training.
+							<blockquote>
+								# compile model
+								</br>
+								model.compile(optimizer=opt, loss='binary_crossentropy',metrics=['accuracy'])
+							</blockquote>
+							We'll now train the model using 50 epochs (50 iterations over all samples in the training data). At the same time, we will monitor loss and accuracy on the split data. We do so by passing the data_val variable as the validation_data argument.
+							<blockquote>
+								# train model
+								</br>
+								history = model.fit(data_train, epochs=50, validation_data = data_val)
+							</blockquote>
+							While model.fit() is running, a list of the metrics for each epoch is shown in the output.
+							</br>
+							</br>
+							<a href="images/thumbs/epoch data.jpg" class="image"><img src="images/thumbs/epoch data.jpg" alt="" /></a>
+							</br>
+							</br>
+							Note that the call model.fit() returns a History object. This object has a member 'history', which is a dictionary containing data for the metrics that were monitored during training. We can use the dictionary to visualize the training process for the model.
+							<blockquote>
+								# plot the training and validation loss
+								</br>
+								train_loss = history.history['loss']
+								</br>
+								val_loss = history.history['val_loss']
+								</br>
+								plt.plot(train_loss, label = 'training loss')
+								</br>
+								plt.plot(val_loss, label = 'validation loss')
+								</br>
+								plt.legend()
+							</blockquote>
+							<a href="images/thumbs/loss plot.jpg" class="image"><img src="images/thumbs/loss plot.jpg" alt="" /></a>
+							<blockquote>
+								# plot the training and validation accuracy
+								</br>
+								train_accuracy = history.history['accuracy']
+								</br>
+								val_accuracy = history.history['val_accuracy']
+								</br>
+								plt.plot(train_accuracy, label='training accuracy')
+								</br>
+								plt.plot(val_accuracy, label='validation accuracy')
+								</br>
+								plt.legend()
+							</blockquote>
+							<a href="images/thumbs/validation plot.jpg" class="image"><img src="images/thumbs/validation plot.jpg" alt="" /></a>
+							</br>
+							Notice the model is slightly less accurate when making predictions on the validation data.
+							</br>
+							</br>
+							<h2>Make predictions with test images</h2>
+							Now that our model is trained we can load the test images to make predictions and count the number of cells in each image.
+							<blockquote>
+								# load test images
+								</br>
+								test_file = np.load('/content/gdrive/MyDrive/test_images.npz')
+							</blockquote>
+							<blockquote>
+								test_file.files
+							</blockquote>
+							<a href="images/thumbs/test_files.jpg" class="image"><img src="images/thumbs/test_files.jpg" alt="" /></a>
+							<blockquote>
+								X_test = test_file["X"]
+							</blockquote>
+							We need to convert the array file into a tensor object and change the data type to a 32-bit float.
+							<blockquote>
+								X_test = tf.convert_to_tensor(X_test, np.float32)
+							</blockquote>
+							Now use X_test for the parameter to make predictions with our model. Save to a variable.
+							<blockquote>
+								mask_test = model.predict(X_test)
+							</blockquote>
+							<blockquote>
+								type(mask_test)
+							</blockquote>
+							<a href="images/thumbs/x_test_type.jpg" class="image"><img src="images/thumbs/x_test_type.jpg" alt="" /></a>
+							<blockquote>
+								mask_test.shape
+							</blockquote>
+							<a href="images/thumbs/x_test_shape.jpg" class="image"><img src="images/thumbs/x_test_shape.jpg" alt="" /></a>
+							</br>
+							We see that the test has 2000 prediction images, each with 128 rows and columns. All images are grayscale hence the value is 1. Lets take a look at one of the prediction images.
+							<blockquote>
+								idx = 5
+								</br>
+								img = X_test[idx].numpy()
+								</br>
+								plt.imshow(img/255 + .5*mask_test[idx,:,:,0], cmap = 'gray')
+							</blockquote>
+							<a href="images/thumbs/prediction_image.jpg"class="image"><img src="images/thumbs/prediction_image.jpg" alt="" /></a>
+							</br>
+							Notice the highlighted areas surrounding the cell nuclei indicating a cell present.
+							</br>
+							</br>
+							<h2>Counting cells in an image</h2>
+							In order to use the highlighted areas to count the number of cells in an image, we need to convert the soft target labels created during the training process into hard target labels. Currently the target labels for each pixel are values between 0 and 1. We need to round each value to only be a value of 0 or 1. That way there's a clear binary classification for cells in an image. 
+							</br>
+							</br>
+							Import the connected components library, which will be used to compute the connected hard labels. 
+							<blockquote>
+								import cv2
+							</blockquote>
+							Let's show a random image from the test images along with the corresponding 	predictive masks. Then use the rounded hard labels as a parameter for the connected components command. Remember to subtract 1 from the count to not include the background of the image. 
+							<blockquote>
+								i = np.random.randint(2000)
+								</br>
+								print('i is: ', i)
+								</br>
+								img = X_test[i]
+								</br>
+								mask = mask_test[i,:,:,0]
+								</br>
+								plt.imshow(img)
+								</br>
+								plt.figure()
+								</br>
+								plt.imshow(np.round(mask))
+								</br>
+								</br>
+								count, _  = cv2.connectedComponents(np.uint8(np.round(mask)))
+								</br>
+								# Subtract 1. Don't include the background!
+								</br>
+								count = count - 1
+								</br>
+								print('count is: ', count)
+							</blockquote>
+							<a href="images/thumbs/cc_images.jpg"class="image"><img src="images/thumbs/cc_images.jpg" alt="" /></a>
+							</br>
+							</br>
+							For the image above, the connected components command counted 22 hard labels. Subtracting 1 to exclude the background, we end up with 21 hard labels indicating the number of cells in the image. You can see from the lower image there are 21 predictive masks. Lets superimpose these two images to see the predictive masks hovering over each cell.
+							</br>
+							<blockquote>
+								plt.imshow(img/255 + .25*np.round(mask), cmap = 'gray')
+							</blockquote>
+							<a href="images/thumbs/prediction_superimpose.jpg"class="image"><img src="images/thumbs/prediction_superimpose.jpg" alt="" /></a>
+							</br>
+							</br>
+							<h2>Build database to store results</h2>
+							We can now store our predictions to a database. Lets import the pandas library and create two numpy arrays filled with 0 values. We'll use these arrays to store the index number for each image along with the corresponding cell count. The size for both arrays are equal to the mask_test array.
+							</br>
+							</br>
+							<blockquote>
+								import pandas as pd
+							</blockquote>
+							<blockquote>
+								# shape is (2000, 128, 128, 1)
+								</br>
+								mask_test.shape
+								</br>
+								</br>
+								# length of array is 2000
+								</br>
+								len(mask_test)
+								</br>
+								</br>
+								# create two numpy arrays with zero values
+								</br>
+								indexes = np.zeros(2000)
+								</br>
+								counts = np.zeros(2000)
+							</blockquote>
+							</br>
+							We'll create a for loop that iterates through each prediction from the test to count the number of hard labels for each image. Then store the index number and count to the numpy arrays.
+							<blockquote>
+								for i in range(len(mask_test)):
+								  </br>
+								  <p class="tab">mask = mask_test[i,:,:,0]
+								  </br>
+								  count, _  = cv2.connectedComponents(np.uint8(np.round(mask)))
+								  </br>
+								  count = count - 1 
+								  </br>
+								  </br>
+								  # add index and count to arrays
+								  </br>
+								  indexes[i] = i
+								  </br>
+								  counts[i] = count
+								  </p>
+							</blockquote>
+							Convert the arrays to integer data types.
+							<blockquote>
+								indexes = indexes.astype(int)
+								</br>
+								counts = counts.astype(int)
+							</blockquote>
+							Create an empty pandas dataframe with column names 'index' and 'count'.
+							<blockquote>
+								results = pd.DataFrame(columns=["index","count"])
+							</blockquote>
+							Transfer the array data to the corresponding columns in the dataframe.
+							<blockquote>
+								results['index'] = indexes
+								</br>
+								results['count'] = counts
+							</blockquote>
+							A view of the dataframe.
+							<blockquote>
+								results
+							</blockquote>
+							<a href="images/thumbs/results.jpg"class="image"><img src="images/thumbs/results.jpg" alt="" /></a>
+							</br>
+							We can now export our dataframe to a csv file.
+							<blockquote>
+								from google.colab import files
+								</br>
+								results.to_csv('U-Net Project Results.csv', encoding = 'utf-8-sig', index=False)
+								</br> 
+								files.download('U-Net Project Results.csv')
+							</blockquote>
+
+
+
+
+
+						</p>			
+
+					</section>
+
+				<!-- Three -->
+					<section id="three">
+						<h2>Get In Touch</h2>
+						<p>seansanchez951@gmail.com</p>
+						<div class="row">
+							<div class="col-8 col-12-small">
+								<form method="post" action="contact-form-handler.php">
+									<div class="row gtr-uniform gtr-50">
+										<div class="col-6 col-12-xsmall"><input type="text" name="name" id="name" placeholder="Name" /></div>
+										<div class="col-6 col-12-xsmall"><input type="email" name="email" id="email" placeholder="Email" /></div>
+										<div class="col-12"><textarea name="message" id="message" placeholder="Message" rows="4"></textarea></div>
+									</div>
+								</form>
+								<ul class="actions">
+									<li><input type="submit" value="Send Message" /></li>
+								</ul>
+							</div>
+							<div class="col-4 col-12-small">
+								<ul class="labeled-icons">
+									<li>
+										<h3 class="icon solid fa-home"><span class="label">Address</span></h3>
+										San Francisco<br />
+										California<br />
+										United States
+									</li>
+									<li>
+										<h3 class="icon solid fa-envelope"><span class="label">Email</span></h3>
+										<a href="#">seansanchez951@gmail.com</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</section>
+
+				<!-- Four -->
+				<!--
+					<section id="four">
+						<h2>Elements</h2>
+
+						<section>
+							<h4>Text</h4>
+							<p>This is <b>bold</b> and this is <strong>strong</strong>. This is <i>italic</i> and this is <em>emphasized</em>.
+							This is <sup>superscript</sup> text and this is <sub>subscript</sub> text.
+							This is <u>underlined</u> and this is code: <code>for (;;) { ... }</code>. Finally, <a href="#">this is a link</a>.</p>
+							<hr />
+							<header>
+								<h4>Heading with a Subtitle</h4>
+								<p>Lorem ipsum dolor sit amet nullam id egestas urna aliquam</p>
+							</header>
+							<p>Nunc lacinia ante nunc ac lobortis. Interdum adipiscing gravida odio porttitor sem non mi integer non faucibus ornare mi ut ante amet placerat aliquet. Volutpat eu sed ante lacinia sapien lorem accumsan varius montes viverra nibh in adipiscing blandit tempus accumsan.</p>
+							<header>
+								<h5>Heading with a Subtitle</h5>
+								<p>Lorem ipsum dolor sit amet nullam id egestas urna aliquam</p>
+							</header>
+							<p>Nunc lacinia ante nunc ac lobortis. Interdum adipiscing gravida odio porttitor sem non mi integer non faucibus ornare mi ut ante amet placerat aliquet. Volutpat eu sed ante lacinia sapien lorem accumsan varius montes viverra nibh in adipiscing blandit tempus accumsan.</p>
+							<hr />
+							<h2>Heading Level 2</h2>
+							<h3>Heading Level 3</h3>
+							<h4>Heading Level 4</h4>
+							<h5>Heading Level 5</h5>
+							<h6>Heading Level 6</h6>
+							<hr />
+							<h5>Blockquote</h5>
+							<blockquote>Fringilla nisl. Donec accumsan interdum nisi, quis tincidunt felis sagittis eget tempus euismod. Vestibulum ante ipsum primis in faucibus vestibulum. Blandit adipiscing eu felis iaculis volutpat ac adipiscing accumsan faucibus. Vestibulum ante ipsum primis in faucibus lorem ipsum dolor sit amet nullam adipiscing eu felis.</blockquote>
+							<h5>Preformatted</h5>
+							<pre><code>i = 0;
+
+while (!deck.isInOrder()) {
+print 'Iteration ' + i;
+deck.shuffle();
+i++;
+}
+
+print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
+						</section>
+
+						<section>
+							<h4>Lists</h4>
+							<div class="row">
+								<div class="col-6 col-12-xsmall">
+									<h5>Unordered</h5>
+									<ul>
+										<li>Dolor pulvinar etiam magna etiam.</li>
+										<li>Sagittis adipiscing lorem eleifend.</li>
+										<li>Felis enim feugiat dolore viverra.</li>
+									</ul>
+									<h5>Alternate</h5>
+									<ul class="alt">
+										<li>Dolor pulvinar etiam magna etiam.</li>
+										<li>Sagittis adipiscing lorem eleifend.</li>
+										<li>Felis enim feugiat dolore viverra.</li>
+									</ul>
+								</div>
+								<div class="col-6 col-12-xsmall">
+									<h5>Ordered</h5>
+									<ol>
+										<li>Dolor pulvinar etiam magna etiam.</li>
+										<li>Etiam vel felis at lorem sed viverra.</li>
+										<li>Felis enim feugiat dolore viverra.</li>
+										<li>Dolor pulvinar etiam magna etiam.</li>
+										<li>Etiam vel felis at lorem sed viverra.</li>
+										<li>Felis enim feugiat dolore viverra.</li>
+									</ol>
+									<h5>Icons</h5>
+									<ul class="icons">
+										<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+										<li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+										<li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+										<li><a href="#" class="icon brands fa-github"><span class="label">Github</span></a></li>
+										<li><a href="#" class="icon brands fa-dribbble"><span class="label">Dribbble</span></a></li>
+										<li><a href="#" class="icon brands fa-tumblr"><span class="label">Tumblr</span></a></li>
+									</ul>
+								</div>
+							</div>
+							<h5>Actions</h5>
+							<ul class="actions">
+								<li><a href="#" class="button primary">Default</a></li>
+								<li><a href="#" class="button">Default</a></li>
+							</ul>
+							<ul class="actions small">
+								<li><a href="#" class="button primary small">Small</a></li>
+								<li><a href="#" class="button small">Small</a></li>
+							</ul>
+							<div class="row">
+								<div class="col-6 col-12-small">
+									<ul class="actions stacked">
+										<li><a href="#" class="button primary">Default</a></li>
+										<li><a href="#" class="button">Default</a></li>
+									</ul>
+								</div>
+								<div class="col-6 col-12-small">
+									<ul class="actions stacked">
+										<li><a href="#" class="button primary small">Small</a></li>
+										<li><a href="#" class="button small">Small</a></li>
+									</ul>
+								</div>
+								<div class="col-6 col-12-small">
+									<ul class="actions stacked">
+										<li><a href="#" class="button primary fit">Default</a></li>
+										<li><a href="#" class="button fit">Default</a></li>
+									</ul>
+								</div>
+								<div class="col-6 col-12-small">
+									<ul class="actions stacked">
+										<li><a href="#" class="button primary small fit">Small</a></li>
+										<li><a href="#" class="button small fit">Small</a></li>
+									</ul>
+								</div>
+							</div>
+						</section>
+
+						<section>
+							<h4>Table</h4>
+							<h5>Default</h5>
+							<div class="table-wrapper">
+								<table>
+									<thead>
+										<tr>
+											<th>Name</th>
+											<th>Description</th>
+											<th>Price</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>Item One</td>
+											<td>Ante turpis integer aliquet porttitor.</td>
+											<td>29.99</td>
+										</tr>
+										<tr>
+											<td>Item Two</td>
+											<td>Vis ac commodo adipiscing arcu aliquet.</td>
+											<td>19.99</td>
+										</tr>
+										<tr>
+											<td>Item Three</td>
+											<td> Morbi faucibus arcu accumsan lorem.</td>
+											<td>29.99</td>
+										</tr>
+										<tr>
+											<td>Item Four</td>
+											<td>Vitae integer tempus condimentum.</td>
+											<td>19.99</td>
+										</tr>
+										<tr>
+											<td>Item Five</td>
+											<td>Ante turpis integer aliquet porttitor.</td>
+											<td>29.99</td>
+										</tr>
+									</tbody>
+									<tfoot>
+										<tr>
+											<td colspan="2"></td>
+											<td>100.00</td>
+										</tr>
+									</tfoot>
+								</table>
+							</div>
+
+							<h5>Alternate</h5>
+							<div class="table-wrapper">
+								<table class="alt">
+									<thead>
+										<tr>
+											<th>Name</th>
+											<th>Description</th>
+											<th>Price</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>Item One</td>
+											<td>Ante turpis integer aliquet porttitor.</td>
+											<td>29.99</td>
+										</tr>
+										<tr>
+											<td>Item Two</td>
+											<td>Vis ac commodo adipiscing arcu aliquet.</td>
+											<td>19.99</td>
+										</tr>
+										<tr>
+											<td>Item Three</td>
+											<td> Morbi faucibus arcu accumsan lorem.</td>
+											<td>29.99</td>
+										</tr>
+										<tr>
+											<td>Item Four</td>
+											<td>Vitae integer tempus condimentum.</td>
+											<td>19.99</td>
+										</tr>
+										<tr>
+											<td>Item Five</td>
+											<td>Ante turpis integer aliquet porttitor.</td>
+											<td>29.99</td>
+										</tr>
+									</tbody>
+									<tfoot>
+										<tr>
+											<td colspan="2"></td>
+											<td>100.00</td>
+										</tr>
+									</tfoot>
+								</table>
+							</div>
+						</section>
+
+						<section>
+							<h4>Buttons</h4>
+							<ul class="actions">
+								<li><a href="#" class="button primary">Primary</a></li>
+								<li><a href="#" class="button">Default</a></li>
+							</ul>
+							<ul class="actions">
+								<li><a href="#" class="button large">Large</a></li>
+								<li><a href="#" class="button">Default</a></li>
+								<li><a href="#" class="button small">Small</a></li>
+							</ul>
+							<ul class="actions fit">
+								<li><a href="#" class="button primary fit">Fit</a></li>
+								<li><a href="#" class="button fit">Fit</a></li>
+							</ul>
+							<ul class="actions fit small">
+								<li><a href="#" class="button primary fit small">Fit + Small</a></li>
+								<li><a href="#" class="button fit small">Fit + Small</a></li>
+							</ul>
+							<ul class="actions">
+								<li><a href="#" class="button primary icon solid fa-download">Icon</a></li>
+								<li><a href="#" class="button icon solid fa-download">Icon</a></li>
+							</ul>
+							<ul class="actions">
+								<li><span class="button primary disabled">Primary</span></li>
+								<li><span class="button disabled">Default</span></li>
+							</ul>
+						</section>
+
+						<section>
+							<h4>Form</h4>
+							<form method="post" action="#">
+								<div class="row gtr-uniform gtr-50">
+									<div class="col-6 col-12-xsmall">
+										<input type="text" name="demo-name" id="demo-name" value="" placeholder="Name" />
+									</div>
+									<div class="col-6 col-12-xsmall">
+										<input type="email" name="demo-email" id="demo-email" value="" placeholder="Email" />
+									</div>
+									<div class="col-12">
+										<select name="demo-category" id="demo-category">
+											<option value="">- Category -</option>
+											<option value="1">Manufacturing</option>
+											<option value="1">Shipping</option>
+											<option value="1">Administration</option>
+											<option value="1">Human Resources</option>
+										</select>
+									</div>
+									<div class="col-4 col-12-small">
+										<input type="radio" id="demo-priority-low" name="demo-priority" checked>
+										<label for="demo-priority-low">Low Priority</label>
+									</div>
+									<div class="col-4 col-12-small">
+										<input type="radio" id="demo-priority-normal" name="demo-priority">
+										<label for="demo-priority-normal">Normal Priority</label>
+									</div>
+									<div class="col-4 col-12-small">
+										<input type="radio" id="demo-priority-high" name="demo-priority">
+										<label for="demo-priority-high">High Priority</label>
+									</div>
+									<div class="col-6 col-12-small">
+										<input type="checkbox" id="demo-copy" name="demo-copy">
+										<label for="demo-copy">Email me a copy of this message</label>
+									</div>
+									<div class="col-6 col-12-small">
+										<input type="checkbox" id="demo-human" name="demo-human" checked>
+										<label for="demo-human">I am a human and not a robot</label>
+									</div>
+									<div class="col-12">
+										<textarea name="demo-message" id="demo-message" placeholder="Enter your message" rows="6"></textarea>
+									</div>
+									<div class="col-12">
+										<ul class="actions">
+											<li><input type="submit" value="Send Message" class="primary" /></li>
+											<li><input type="reset" value="Reset" /></li>
+										</ul>
+									</div>
+								</div>
+							</form>
+						</section>
+
+						<section>
+							<h4>Image</h4>
+							<h5>Fit</h5>
+							<div class="box alt">
+								<div class="row gtr-50 gtr-uniform">
+									<div class="col-12"><span class="image fit"><img src="images/fulls/05.jpg" alt="" /></span></div>
+									<div class="col-4"><span class="image fit"><img src="images/thumbs/01.jpg" alt="" /></span></div>
+									<div class="col-4"><span class="image fit"><img src="images/thumbs/02.jpg" alt="" /></span></div>
+									<div class="col-4"><span class="image fit"><img src="images/thumbs/03.jpg" alt="" /></span></div>
+									<div class="col-4"><span class="image fit"><img src="images/thumbs/04.jpg" alt="" /></span></div>
+									<div class="col-4"><span class="image fit"><img src="images/thumbs/05.jpg" alt="" /></span></div>
+									<div class="col-4"><span class="image fit"><img src="images/thumbs/06.jpg" alt="" /></span></div>
+									<div class="col-4"><span class="image fit"><img src="images/thumbs/03.jpg" alt="" /></span></div>
+									<div class="col-4"><span class="image fit"><img src="images/thumbs/02.jpg" alt="" /></span></div>
+									<div class="col-4"><span class="image fit"><img src="images/thumbs/01.jpg" alt="" /></span></div>
+								</div>
+							</div>
+							<h5>Left &amp; Right</h5>
+							<p><span class="image left"><img src="images/avatar.jpg" alt="" /></span>Fringilla nisl. Donec accumsan interdum nisi, quis tincidunt felis sagittis eget. tempus euismod. Vestibulum ante ipsum primis in faucibus vestibulum. Blandit adipiscing eu felis iaculis volutpat ac adipiscing accumsan eu faucibus. Integer ac pellentesque praesent tincidunt felis sagittis eget. tempus euismod. Vestibulum ante ipsum primis in faucibus vestibulum. Blandit adipiscing eu felis iaculis volutpat ac adipiscing accumsan eu faucibus. Integer ac pellentesque praesent. Donec accumsan interdum nisi, quis tincidunt felis sagittis eget. tempus euismod. Vestibulum ante ipsum primis in faucibus vestibulum. Blandit adipiscing eu felis iaculis volutpat ac adipiscing accumsan eu faucibus. Integer ac pellentesque praesent tincidunt felis sagittis eget. tempus euismod. Vestibulum ante ipsum primis in faucibus vestibulum. Blandit adipiscing eu felis iaculis volutpat ac adipiscing accumsan eu faucibus. Integer ac pellentesque praesent.</p>
+							<p><span class="image right"><img src="images/avatar.jpg" alt="" /></span>Fringilla nisl. Donec accumsan interdum nisi, quis tincidunt felis sagittis eget. tempus euismod. Vestibulum ante ipsum primis in faucibus vestibulum. Blandit adipiscing eu felis iaculis volutpat ac adipiscing accumsan eu faucibus. Integer ac pellentesque praesent tincidunt felis sagittis eget. tempus euismod. Vestibulum ante ipsum primis in faucibus vestibulum. Blandit adipiscing eu felis iaculis volutpat ac adipiscing accumsan eu faucibus. Integer ac pellentesque praesent. Donec accumsan interdum nisi, quis tincidunt felis sagittis eget. tempus euismod. Vestibulum ante ipsum primis in faucibus vestibulum. Blandit adipiscing eu felis iaculis volutpat ac adipiscing accumsan eu faucibus. Integer ac pellentesque praesent tincidunt felis sagittis eget. tempus euismod. Vestibulum ante ipsum primis in faucibus vestibulum. Blandit adipiscing eu felis iaculis volutpat ac adipiscing accumsan eu faucibus. Integer ac pellentesque praesent.</p>
+						</section>
+
+					</section>
+				-->
+
+			</div>
+
+		<!-- Footer -->
+			<footer id="footer">
+				<div class="inner">
+					<ul class="icons">
+						<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+						<li><a href="#" class="icon brands fa-github"><span class="label">Github</span></a></li>
+						<li><a href="#" class="icon brands fa-dribbble"><span class="label">Dribbble</span></a></li>
+						<li><a href="#" class="icon solid fa-envelope"><span class="label">Email</span></a></li>
+					</ul>
+					<ul class="copyright">
+						<li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+					</ul>
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.poptrox.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

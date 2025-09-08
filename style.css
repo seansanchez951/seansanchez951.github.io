@@ -1,0 +1,69 @@
+body {
+  font-family: Georgia, serif;
+  background-color: #fff;
+  color: #000;
+}
+
+/* Grid wrapper for all your mix items */
+.mix-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
+}
+  
+/* Each mix item: boxed layout */
+.mix-item {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 1rem;
+
+  border: 1px solid #000;    
+  padding: 1rem;
+  background-color: #fff;
+  box-sizing: border-box;     
+}
+
+/* Thumbnail images */
+.mix-item img {
+  width: 100%;
+  max-width: 120px;
+  height: auto;
+  border-radius: 0;
+}
+
+/* Mix title */
+.mix-item h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Audio player */
+.mix-item audio {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+/* Software project cards */
+.project-item {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #000;
+  padding: 1rem;
+  background-color: #fff;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.project-item h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.project-item p {
+  font-size: 0.9rem;
+  color: #333;
+  margin: 0;
+}
+
+  
